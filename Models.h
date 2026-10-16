@@ -1,39 +1,46 @@
-
-#ifndef MODELS_H
-#define MODELS_H
+#pragma once
 
 #include <string>
 #include <vector>
-#include <iostream>
 
 using namespace std;
+
+// CLASS COURSE
+// Luu thong tin mon hoc
 class Course {
 private:
-    string courseId;
-    string courseName;
-    int credits;
+    string courseId;    // Ma mon hoc
+    string courseName;  // Ten mon hoc
+    int credits;        // So tin chi
 
 public:
+    // Constructor mac dinh
     Course() : credits(0) {}
 
+    // Constructor co tham so
     Course(string id, string name, int cr)
         : courseId(id), courseName(name), credits(cr) {}
 
-    string getCourseId() const { return courseId; }
-    string getCourseName() const { return courseName; }
-    int getCredits() const { return credits; }
+    // Cac ham lay thong tin mon hoc
+    string getCourseId() const {
+        return courseId;
+    }
 
-    void display() const {
-        cout << "Ma mon: " << courseId
-             << ", Ten mon: " << courseName
-             << ", Tin chi: " << credits << endl;
+    string getCourseName() const {
+        return courseName;
+    }
+
+    int getCredits() const {
+        return credits;
     }
 };
 
+//CLASS STUDENT
+// Luu thong tin sinh vien
 class Student {
 private:
-    string studentId;
-    string fullName;
+    string studentId;   // Ma sinh vien
+    string fullName;    // Ho ten sinh vien
 
 public:
     Student() {}
@@ -41,19 +48,22 @@ public:
     Student(string id, string name)
         : studentId(id), fullName(name) {}
 
-    string getStudentId() const { return studentId; }
-    string getFullName() const { return fullName; }
+    string getStudentId() const {
+        return studentId;
+    }
 
-    void display() const {
-        cout << "Ma SV: " << studentId
-             << ", Ho ten: " << fullName << endl;
+    string getFullName() const {
+        return fullName;
     }
 };
 
+
+// CLASS EXAMROOM 
+// Luu thong tin phong thi
 class ExamRoom {
 private:
-    string roomId;
-    int capacity;
+    string roomId;  // Ma phong thi
+    int capacity;   // So sinh vien toi da
 
 public:
     ExamRoom() : capacity(0) {}
@@ -61,20 +71,23 @@ public:
     ExamRoom(string id, int cap)
         : roomId(id), capacity(cap) {}
 
-    string getRoomId() const { return roomId; }
-    int getCapacity() const { return capacity; }
+    string getRoomId() const {
+        return roomId;
+    }
 
-    void display() const {
-        cout << "Ma phong: " << roomId
-             << ", Suc chua: " << capacity << endl;
+    int getCapacity() const {
+        return capacity;
     }
 };
 
+
+// CLASS TIMESLOT 
+// Luu ngay va gio thi
 class TimeSlot {
 private:
-    string examDate;     // YYYY-MM-DD
-    string startTime;    // HH:MM
-    string endTime;      // HH:MM
+    string examDate;    // Ngay thi: YYYY-MM-DD
+    string startTime;   // Gio bat dau: HH:MM
+    string endTime;     // Gio ket thuc: HH:MM
 
 public:
     TimeSlot() {}
@@ -82,28 +95,34 @@ public:
     TimeSlot(string date, string start, string end)
         : examDate(date), startTime(start), endTime(end) {}
 
-    string getExamDate() const { return examDate; }
-    string getStartTime() const { return startTime; }
-    string getEndTime() const { return endTime; }
+    string getExamDate() const {
+        return examDate;
+    }
 
-    void display() const {
-        cout << "Ngay thi: " << examDate
-             << ", Tu " << startTime
-             << " den " << endTime << endl;
+    string getStartTime() const {
+        return startTime;
+    }
+
+    string getEndTime() const {
+        return endTime;
     }
 };
 
+
+// CLASS SCHEDULE
+// Luu thong tin mot lich thi
 class Schedule {
 private:
-    string scheduleId;
-    Course course;
-    ExamRoom room;
-    TimeSlot timeSlot;
-    vector<Student> students;
+    string scheduleId;      // Ma lich thi
+    Course course;          // Mon thi
+    ExamRoom room;          // Phong thi
+    TimeSlot timeSlot;      // Khung gio thi
+    vector<Student> students; // Danh sach sinh vien thi
 
 public:
     Schedule() {}
 
+    // Tao lich thi voi mon, phong va thoi gian
     Schedule(string id, Course c, ExamRoom r, TimeSlot t)
         : scheduleId(id), course(c), room(r), timeSlot(t) {}
 
@@ -111,43 +130,28 @@ public:
         return scheduleId;
     }
 
-    void addStudent(const Student& student) {
-        // Không thêm sinh viên trùng mã
+    // Them sinh vien vao lich thi
+    bool addStudent(const Student& student) {
+        // 1. Kiem tra sinh vien da co trong danh sach chua
         for (const Student& s : students) {
             if (s.getStudentId() == student.getStudentId()) {
-                return;
+                return false; // Khong them trung
             }
         }
 
-        // kiem tra suc chua phong
+        // 2. Kiem tra phong thi con cho khong
         if (students.size() >= static_cast<size_t>(room.getCapacity())) {
-            cout << "Phong thi da day!" << endl;
-            return;
+            return false; // Phong da day
         }
 
+        // 3. Neu hop le, them sinh vien vao danh sach
         students.push_back(student);
+
+        return true; // Them thanh cong
     }
 
+    // Lay danh sach sinh vien trong lich thi
     const vector<Student>& getStudents() const {
         return students;
     }
-
-    void display() const {
-        cout << "\n=== LICH THI ===" << endl;
-        cout << "Ma lich: " << scheduleId << endl;
-
-        course.display();
-        room.display();
-        timeSlot.display();
-
-        cout << "Danh sach sinh vien:" << endl;
-        for (const Student& s : students) {
-            s.display();
-        }
-
-        cout << "Tong so sinh vien: "
-             << students.size() << endl;
-    }
 };
-
-#endif 

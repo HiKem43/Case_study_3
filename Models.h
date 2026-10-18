@@ -1,3 +1,4 @@
+
 #pragma once
 #include <string>
 #include <vector>
@@ -5,28 +6,66 @@
 
 using namespace std;
 
-// ==================== HAM KIEM TRA CHUNG ====================
+// ==================== HAM CHUAN HOA ====================
 
-// Kiem tra chuoi khong rong
-bool isNotEmpty(const string& s) {
+// Xoa khoang trang thua, gop nhieu khoang trang thanh mot
+inline string normalizeName(const string& s) {
+    string result = "";
+    bool needSpace = false;
+
     for (int i = 0; i < (int)s.length(); i++) {
-        if (!isspace((unsigned char)s[i])) {
-            return true;
+        unsigned char c = (unsigned char)s[i];
+
+        if (isspace(c)) {
+            if (!result.empty()) {
+                needSpace = true;
+            }
+        } else {
+            if (needSpace) {
+                result += ' ';
+                needSpace = false;
+            }
+            result += (char)c;
         }
     }
-    return false;
+
+    return result;
 }
 
-// Kiem tra ma chi gom chu, so, dau gach ngang va gach duoi
-bool isValidCode(const string& code) {
-    if (!isNotEmpty(code)) {
+// Chi giu lai chu cai tieng Anh va chu so trong ma
+inline string normalizeCode(const string& code) {
+    string result = "";
+
+    for (int i = 0; i < (int)code.length(); i++) {
+        unsigned char c = (unsigned char)code[i];
+
+        if ((c >= 'A' && c <= 'Z') ||
+            (c >= 'a' && c <= 'z') ||
+            (c >= '0' && c <= '9')) {
+            result += (char)c;
+        }
+    }
+
+    return result;
+}
+
+// Kiem tra chuoi khong rong
+inline bool isNotEmpty(const string& s) {
+    return !normalizeName(s).empty();
+}
+
+// Kiem tra ma chi gom chu va so
+inline bool isValidCode(const string& code) {
+    if (code.empty()) {
         return false;
     }
 
     for (int i = 0; i < (int)code.length(); i++) {
-        char c = code[i];
+        unsigned char c = (unsigned char)code[i];
 
-        if (!isalnum((unsigned char)c) && c != '-' && c != '_') {
+        if (!((c >= 'A' && c <= 'Z') ||
+              (c >= 'a' && c <= 'z') ||
+              (c >= '0' && c <= '9'))) {
             return false;
         }
     }
@@ -34,8 +73,35 @@ bool isValidCode(const string& code) {
     return true;
 }
 
-// Kiem tra ngay theo dinh dang YYYY-MM-DD
-bool isValidDate(const string& date) {
+// Kiem tra ten sau khi chuan hoa
+// Chap nhan chu co dau tieng Viet, khoang trang,
+// dau nhay va dau gach ngang; khong chap nhan chu so.
+inline bool isValidName(const string& name) {
+    string s = normalizeName(name);
+
+    if (s.empty()) {
+        return false;
+    }
+
+    for (int i = 0; i < (int)s.length(); i++) {
+        unsigned char c = (unsigned char)s[i];
+
+        if (c < 128) {
+            if (!isalpha(c) && c != ' ' &&
+                c != '-' && c != '\'') {
+                return false;
+            }
+        }
+        // Cac byte UTF-8 cua chu co dau tieng Viet
+        // duoc chap nhan.
+    }
+
+    return true;
+}
+
+// ==================== KIEM TRA NGAY ====================
+
+inline bool isValidDate(const string& date) {
     if (date.length() != 10 ||
         date[4] != '-' || date[7] != '-') {
         return false;
@@ -68,7 +134,6 @@ bool isValidDate(const string& date) {
         31, 31, 30, 31, 30, 31
     };
 
-    // Kiem tra nam nhuan
     bool leapYear = (year % 400 == 0) ||
                     (year % 4 == 0 && year % 100 != 0);
 
@@ -76,16 +141,14 @@ bool isValidDate(const string& date) {
         daysInMonth[1] = 29;
     }
 
-    if (day < 1 || day > daysInMonth[month - 1]) {
-        return false;
-    }
-
-    return true;
+    return day >= 1 && day <= daysInMonth[month - 1];
 }
+
+// ==================== KIEM TRA GIO ====================
 
 // Chuyen gio HH:MM thanh so phut
 // Tra ve -1 neu gio khong hop le
-int timeToMinutes(const string& time) {
+inline int timeToMinutes(const string& time) {
     if (time.length() != 5 || time[2] != ':') {
         return -1;
     }
@@ -127,14 +190,14 @@ public:
     }
 
     Course(string id, string name, int dur) {
-        courseId = id;
-        courseName = name;
+        courseId = normalizeCode(id);
+        courseName = normalizeName(name);
         duration = dur;
     }
 
     bool isValid() const {
         return isValidCode(courseId) &&
-               isNotEmpty(courseName) &&
+               isValidName(courseName) &&
                duration > 0;
     }
 
@@ -171,16 +234,21 @@ public:
 
     Student(string id, string name, string dob,
             string g, vector<string> courses) {
-        studentId = id;
-        fullName = name;
+        studentId = normalizeCode(id);
+        fullName = normalizeName(name);
         dateOfBirth = dob;
-        gender = g;
-        registeredCourses = courses;
+        gender = normalizeName(g);
+
+        for (int i = 0; i < (int)courses.size(); i++) {
+            registeredCourses.push_back(
+                normalizeCode(courses[i])
+            );
+        }
     }
 
     bool isValid() const {
         if (!isValidCode(studentId) ||
-            !isNotEmpty(fullName) ||
+            !isValidName(fullName) ||
             !isValidDate(dateOfBirth)) {
             return false;
         }
@@ -191,16 +259,15 @@ public:
             return false;
         }
 
-        // Kiem tra ma mon hoc dang ky
         for (int i = 0; i < (int)registeredCourses.size(); i++) {
             if (!isValidCode(registeredCourses[i])) {
                 return false;
             }
 
-            // Khong cho phep dang ky trung mon
             for (int j = i + 1;
                  j < (int)registeredCourses.size(); j++) {
-                if (registeredCourses[i] == registeredCourses[j]) {
+                if (registeredCourses[i] ==
+                    registeredCourses[j]) {
                     return false;
                 }
             }
@@ -230,8 +297,10 @@ public:
     }
 
     bool hasRegisteredCourse(const string& courseId) const {
+        string id = normalizeCode(courseId);
+
         for (int i = 0; i < (int)registeredCourses.size(); i++) {
-            if (registeredCourses[i] == courseId) {
+            if (registeredCourses[i] == id) {
                 return true;
             }
         }
@@ -254,7 +323,7 @@ public:
     }
 
     ExamRoom(string id, int cap) {
-        roomId = id;
+        roomId = normalizeCode(id);
         capacity = cap;
     }
 
@@ -275,62 +344,12 @@ public:
 
 class TimeSlot {
 private:
+    string timeSlotId;
     string examDate;
     string startTime;
     string endTime;
 
 public:
-    TimeSlot() {
-        examDate = "";
-        startTime = "";
-        endTime = "";
-    }
-
-    TimeSlot(string date, string start, string end) {
-        examDate = date;
-        startTime = start;
-        endTime = end;
-    }
-
-    bool isValid() const {
-        int start = timeToMinutes(startTime);
-        int end = timeToMinutes(endTime);
-
-        return isValidDate(examDate) &&
-               start >= 0 &&
-               end >= 0 &&
-               end > start;
-    }
-
-    string getExamDate() const {
-        return examDate;
-    }
-
-    string getStartTime() const {
-        return startTime;
-    }
-
-    string getEndTime() const {
-        return endTime;
-    }
-
-    // Kiem tra hai khung gio co trung nhau khong
-    bool overlaps(const TimeSlot& other) const {
-        if (!isValid() || !other.isValid()) {
-            return false;
-        }
-    }
-};
-
-class TimeSlot {
-private:
-    string timeSlotId;  // Ma ca thi
-    string examDate;    // Ngay thi
-    string startTime;   // Gio bat dau
-    string endTime;     // Gio ket thuc
-
-public:
-    // Ham khoi tao mac dinh
     TimeSlot() {
         timeSlotId = "";
         examDate = "";
@@ -338,15 +357,14 @@ public:
         endTime = "";
     }
 
-    // Ham khoi tao co tham so
-    TimeSlot(string id, string date, string start, string end) {
-        timeSlotId = id;
+    TimeSlot(string id, string date,
+             string start, string end) {
+        timeSlotId = normalizeCode(id);
         examDate = date;
         startTime = start;
         endTime = end;
     }
 
-    // Kiem tra tinh hop le cua ca thi
     bool isValid() const {
         int start = timeToMinutes(startTime);
         int end = timeToMinutes(endTime);
@@ -358,22 +376,18 @@ public:
                end > start;
     }
 
-    // Lay ma ca thi
     string getTimeSlotId() const {
         return timeSlotId;
     }
 
-    // Lay ngay thi
     string getExamDate() const {
         return examDate;
     }
 
-    // Lay gio bat dau
     string getStartTime() const {
         return startTime;
     }
 
-    // Lay gio ket thuc
     string getEndTime() const {
         return endTime;
     }
@@ -413,7 +427,7 @@ public:
     }
 
     Schedule(string id, Course c, ExamRoom r, TimeSlot t) {
-        scheduleId = id;
+        scheduleId = normalizeCode(id);
         course = c;
         room = r;
         timeSlot = t;
@@ -447,7 +461,7 @@ public:
         return students;
     }
 
-    // Kiem tra thoi gian thi co du thoi luong mon hoc
+    // Kiem tra thoi luong ca thi co du cho mon hoc
     bool hasEnoughDuration() const {
         int start = timeToMinutes(timeSlot.getStartTime());
         int end = timeToMinutes(timeSlot.getEndTime());
@@ -459,18 +473,16 @@ public:
         return end - start >= course.getDuration();
     }
 
-    // Them sinh vien neu tat ca dieu kien deu hop le
+    // Them sinh vien vao lich thi
     bool addStudent(const Student& student) {
         if (!isValid() || !student.isValid()) {
             return false;
         }
 
-        // Sinh vien phai dang ky mon thi
         if (!student.hasRegisteredCourse(course.getCourseId())) {
             return false;
         }
 
-        // Khong cho phep trung sinh vien trong lich thi
         for (int i = 0; i < (int)students.size(); i++) {
             if (students[i].getStudentId() ==
                 student.getStudentId()) {
@@ -478,7 +490,6 @@ public:
             }
         }
 
-        // Khong duoc vuot qua suc chua phong
         if ((int)students.size() >= room.getCapacity()) {
             return false;
         }
@@ -487,13 +498,13 @@ public:
         return true;
     }
 
-    // Kiem tra hai lich co dung cung phong va trung gio
+    // Hai lich co cung phong va trung gio
     bool conflictsWithRoom(const Schedule& other) const {
         return room.getRoomId() == other.room.getRoomId() &&
                timeSlot.overlaps(other.timeSlot);
     }
 
-    // Kiem tra hai lich co sinh vien chung khong
+    // Kiem tra hai lich co sinh vien chung
     bool hasCommonStudent(const Schedule& other) const {
         for (int i = 0; i < (int)students.size(); i++) {
             for (int j = 0;
@@ -508,7 +519,7 @@ public:
         return false;
     }
 
-    // Kiem tra sinh vien co bi trung lich thi khong
+    // Kiem tra sinh vien co bi trung lich thi
     bool conflictsWithStudent(const Schedule& other) const {
         return timeSlot.overlaps(other.timeSlot) &&
                hasCommonStudent(other);

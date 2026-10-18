@@ -319,6 +319,9 @@ public:
         if (!isValid() || !other.isValid()) {
             return false;
         }
+    }
+};
+
 class TimeSlot {
 private:
     string timeSlotId;  // Ma ca thi

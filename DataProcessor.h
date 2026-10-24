@@ -8,7 +8,7 @@ using namespace std;
 // Lop xu ly du lieu dau vao cho bai toan xep lich thi
 class DataProcessor {
 private:
-    // Danh sach du lieu doc tu file input.txt
+    // Danh sach du lieu doc tu cac file data
     vector<Course> courses;
     vector<Student> students;
     vector<ExamRoom> rooms;

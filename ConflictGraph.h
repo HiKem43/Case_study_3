@@ -1,6 +1,4 @@
-#ifndef CONFLICT_GRAPH_H
-#define CONFLICT_GRAPH_H
-
+#pragma once
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -101,4 +99,3 @@ public:
     }
 };
 
-#endif // CONFLICT_GRAPH_H

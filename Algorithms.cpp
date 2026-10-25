@@ -6,7 +6,7 @@
 #include <unordered_set>
 #include "Models.h"
 #include "ConflictGraph.h"
-
+#include "DPScheduler.h"
 using namespace std;
 
 // Hàm phụ tạo mã lịch thi tự động tăng: SCH001, SCH002, ..., SCH010

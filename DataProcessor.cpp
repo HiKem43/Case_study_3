@@ -84,10 +84,10 @@ bool DataProcessor::loadFromFile(const string& filename) {
 
     // Tao duong dan den cac file du lieu
     string fileConfig = filename;
-    string fileCourses = thuMuc + "data_Courses";
+    string fileCourses = thuMuc + "data_Courses.txt";
     string fileStudents = thuMuc + "data_Students.txt";
-    string fileRooms = thuMuc + "data_Rooms";
-    string fileSlots = thuMuc + "data_Time_Slots";
+    string fileRooms = thuMuc + "data_Rooms.txt";
+    string fileSlots = thuMuc + "data_Time_Slots.txt";
 
     // ---------- 1. DOC FILE CONFIG ----------
 
@@ -692,4 +692,3 @@ map<string, vector<string> >
 DataProcessor::getConflictGraph() const {
     return conflictGraph;
 }
-

@@ -1,6 +1,7 @@
 #pragma once
 #include <algorithm>
 #include <climits>
+#include <functional>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -141,6 +142,44 @@ namespace DPScheduler {
         }
         reverse(groups.begin(), groups.end());
 
+        // Gan moi nhom vao mot ca du thoi luong va khong chong lan voi nhom khac.
+        vector<int> groupSlots(groups.size(), -1);
+        function<bool(size_t)> assignGroupSlots = [&](size_t groupIndex) {
+            if (groupIndex == groups.size()) return true;
+
+            for (size_t s = 0; s < slots.size(); ++s) {
+                bool fits = true;
+                for (int i = 0; i < m && fits; ++i) {
+                    if ((groups[groupIndex] & (1 << i)) &&
+                        !durationFits(cs[i], slots[s])) {
+                        fits = false;
+                    }
+                }
+                if (!fits) continue;
+
+                bool overlapsAssignedGroup = false;
+                for (size_t previous = 0; previous < groupIndex; ++previous) {
+                    if (groupSlots[previous] >= 0 &&
+                        slots[s].overlaps(slots[groupSlots[previous]])) {
+                        overlapsAssignedGroup = true;
+                        break;
+                    }
+                }
+                if (overlapsAssignedGroup) continue;
+
+                groupSlots[groupIndex] = (int)s;
+                if (assignGroupSlots(groupIndex + 1)) return true;
+                groupSlots[groupIndex] = -1;
+            }
+
+            return false;
+        };
+
+        if (!assignGroupSlots(0)) {
+            for (const auto& c : cs) failedCourses.push_back(c.getCourseId());
+            return result;
+        }
+
         // Sap xep phong tu nho den lon, de dung phong vua du truoc.
         vector<ExamRoom> sortedRooms = rooms;
         sort(sortedRooms.begin(), sortedRooms.end(), [](const ExamRoom& a, const ExamRoom& b) {
@@ -150,17 +189,7 @@ namespace DPScheduler {
 
         int counter = 1;
         for (int g = 0; g < (int)groups.size(); ++g) {
-            int slotIndex = -1;
-            for (int s = 0; s < (int)slots.size(); ++s) {
-                bool allFit = true;
-                for (int i = 0; i < m; ++i)
-                    if ((groups[g] & (1 << i)) && !durationFits(cs[i], slots[s])) allFit = false;
-                if (allFit) { slotIndex = s; break; }
-            }
-            if (slotIndex < 0) {
-                for (const auto& c : cs) failedCourses.push_back(c.getCourseId());
-                return vector<Schedule>();
-            }
+            int slotIndex = groupSlots[g];
 
             unordered_set<string> usedInThisSlot;
             for (int i = 0; i < m; ++i) {

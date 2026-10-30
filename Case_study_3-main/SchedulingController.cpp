@@ -187,7 +187,7 @@ case 4: {
 
     ui.pauseScreen();
     break;
-}5
+}
 
             // ==========================================
             // CHUC NANG 5: THOAT

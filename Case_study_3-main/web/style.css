@@ -1,0 +1,314 @@
+{
+box-sizing: border-box;
+margin: 0;
+padding: 0;
+}
+
+body {
+font-family: "Segoe UI", Arial, sans-serif;
+background: #f4f6fc;
+color: #252943;
+display: flex;
+min-height: 100vh;
+}
+
+.sidebar {
+width: 250px;
+min-height: 100vh;
+background: #20244a;
+color: white;
+padding: 30px 18px;
+flex-shrink: 0;
+}
+
+.sidebar h2 {
+font-size: 20px;
+margin-bottom: 10px;
+}
+
+.sidebar p {
+color: #aeb5dd;
+font-size: 11px;
+margin-bottom: 35px;
+letter-spacing: 1px;
+}
+
+.sidebar button {
+display: block;
+width: 100%;
+padding: 14px;
+margin-bottom: 10px;
+border: none;
+border-radius: 9px;
+color: #e0e3f8;
+background: transparent;
+text-align: left;
+font-size: 14px;
+cursor: pointer;
+transition: 0.2s;
+}
+
+.sidebar button {
+background: #424a85;
+color: white;
+}
+
+main {
+flex: 1;
+min-width: 0;
+padding: 30px;
+}
+
+header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+gap: 15px;
+margin-bottom: 28px;
+}
+
+header p {
+color: #858ba8;
+font-size: 11px;
+margin-bottom: 8px;
+}
+
+header h1 {
+font-size: 25px;
+}
+
+header span {
+background: white;
+padding: 12px 16px;
+border-radius: 10px;
+font-size: 12px;
+box-shadow: 0 3px 15px #25294308;
+}
+
+.welcome {
+background: linear-gradient(120deg, #555bdc, #8588f4);
+padding: 32px;
+border-radius: 18px;
+color: white;
+margin-bottom: 25px;
+box-shadow: 0 8px 25px #555bdc30;
+}
+
+.welcome > p {
+font-size: 11px;
+letter-spacing: 2px;
+opacity: 0.8;
+}
+
+.welcome h2 {
+font-size: 29px;
+margin: 15px 0 10px;
+}
+
+.welcome p {
+line-height: 1.7;
+font-size: 14px;
+}
+
+.primary {
+background: white;
+color: #555bdc;
+border: none;
+padding: 12px 18px;
+border-radius: 8px;
+margin-top: 18px;
+font-weight: 700;
+cursor: pointer;
+transition: 0.2s;
+}
+
+.primary {
+background: #ededff;
+transform: translateY(-2px);
+}
+
+.stats {
+display: grid;
+grid-template-columns: repeat(4, minmax(0, 1fr));
+gap: 16px;
+margin-bottom: 30px;
+}
+
+.card {
+background: white;
+border-radius: 14px;
+padding: 22px;
+box-shadow: 0 4px 18px #25294308;
+border: 1px solid #eceef6;
+}
+
+.stats .card p {
+font-size: 12px;
+color: #858ba8;
+margin-bottom: 12px;
+}
+
+.stats .card h2 {
+font-size: 29px;
+color: #555bdc;
+}
+
+#home > h2 {
+font-size: 19px;
+margin-bottom: 17px;
+}
+
+.algorithms {
+display: grid;
+grid-template-columns: repeat(3, minmax(0, 1fr));
+gap: 17px;
+margin-bottom: 28px;
+}
+
+.algorithms .card {
+transition: 0.2s;
+}
+
+.algorithms .card {
+transform: translateY(-3px);
+box-shadow: 0 8px 25px #25294312;
+}
+
+.algorithms .card h3 {
+font-size: 16px;
+margin-bottom: 12px;
+}
+
+.algorithms .card p {
+font-size: 12px;
+color: #858ba8;
+line-height: 1.7;
+min-height: 40px;
+}
+
+.algorithms .card button {
+margin-top: 17px;
+width: 100%;
+background: #efefff;
+color: #555bdc;
+border: none;
+padding: 12px;
+border-radius: 8px;
+font-weight: 700;
+cursor: pointer;
+transition: 0.2s;
+}
+
+.algorithms .card button {
+background: #555bdc;
+color: white;
+}
+
+.results {
+margin-top: 10px;
+}
+
+.results h2 {
+font-size: 18px;
+margin-bottom: 12px;
+}
+
+.results > p {
+font-size: 13px;
+color: #858ba8;
+line-height: 1.7;
+}
+
+.result-row {
+display: flex;
+flex-wrap: wrap;
+justify-content: space-between;
+align-items: center;
+gap: 10px;
+padding: 14px 0;
+border-bottom: 1px solid #eceef6;
+font-size: 13px;
+}
+
+.badge {
+color: #15885b;
+background: #e4f8ef;
+border-radius: 20px;
+padding: 5px 10px;
+font-size: 11px;
+}
+
+.page {
+display: block;
+}
+
+.hidden {
+display: none !important;
+}
+
+footer {
+color: #999eb4;
+text-align: center;
+font-size: 11px;
+margin-top: 30px;
+padding: 15px;
+}
+
+button {
+font-family: inherit;
+}
+
+@media (max-width: 1000px) {
+.stats {
+grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.algorithms {
+    grid-template-columns: 1fr;
+}
+
+}
+
+@media (max-width: 650px) {
+body {
+display: block;
+}
+
+.sidebar {
+    width: 100%;
+    min-height: auto;
+    padding: 18px;
+}
+
+.sidebar p {
+    margin-bottom: 15px;
+}
+
+.sidebar button {
+    display: inline-block;
+    width: auto;
+    margin: 0 4px 4px 0;
+    padding: 10px;
+}
+
+main {
+    padding: 18px;
+}
+
+header {
+    align-items: flex-start;
+}
+
+header h1 {
+    font-size: 20px;
+}
+
+header span {
+    font-size: 10px;
+}
+
+.welcome {
+    padding: 23px;
+}
+
+}

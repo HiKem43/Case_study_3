@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ExamScheduler - Quản lý lịch thi</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <aside class="sidebar">
+        <h2>📘 ExamScheduler</h2>
+        <p>HỆ THỐNG XẾP LỊCH THI</p>
+        <button onclick="showPage('home')">🏠 Tổng quan</button>
+        <button onclick="showPage('schedule')">📅 Lịch thi</button>
+        <button onclick="showPage('algorithm')">🧠 Thuật toán</button>
+    </aside>
+
+    <main>
+        <header>
+            <div>
+                <p>TRANG CHỦ / DASHBOARD</p>
+                <h1>Hệ thống xếp lịch thi</h1>
+            </div>
+            <span>👤 Quản trị viên</span>
+        </header>
+
+        <section id="home" class="page">
+            <div class="welcome">
+                <p>EXAM SCHEDULING SYSTEM</p>
+                <h2>Xin chào! 👋</h2>
+                <p>Quản lý dữ liệu và tạo lịch thi bằng các thuật toán thông minh.</p>
+                <button class="primary" onclick="loadData()">📂 Đọc dữ liệu</button>
+            </div>
+
+            <div class="stats">
+                <div class="card">
+                    <p>Tổng số môn thi</p>
+                    <h2 id="courses">--</h2>
+                </div>
+                <div class="card">
+                    <p>Số phòng thi</p>
+                    <h2 id="rooms">--</h2>
+                </div>
+                <div class="card">
+                    <p>Số ca thi</p>
+                    <h2 id="slots">--</h2>
+                </div>
+                <div class="card">
+                    <p>Số lịch đã tạo</p>
+                    <h2 id="total">0</h2>
+                </div>
+            </div>
+
+            <h2>Chạy thuật toán</h2>
+            <div class="algorithms">
+                <div class="card">
+                    <h3>⚡ Greedy</h3>
+                    <p>Thuật toán tham lam</p>
+                    <button onclick="runAlgorithm('greedy')">Chạy Greedy</button>
+                </div>
+                <div class="card">
+                    <h3>🔄 Backtracking</h3>
+                    <p>Thuật toán quay lui</p>
+                    <button onclick="runAlgorithm('backtracking')">Chạy Backtracking</button>
+                </div>
+                <div class="card">
+                    <h3>🧩 Dynamic Programming</h3>
+                    <p>Thuật toán quy hoạch động</p>
+                    <button onclick="runAlgorithm('dp')">Chạy DP</button>
+                </div>
+            </div>
+
+            <div class="card results">
+                <h2>Kết quả lịch thi</h2>
+                <p id="message">Hãy đọc dữ liệu và chạy một thuật toán.</p>
+                <div id="result"></div>
+            </div>
+        </section>
+
+        <section id="schedule" class="page hidden">
+            <div class="card">
+                <h2>📅 Lịch thi</h2>
+                <p>Kết quả chạy thuật toán sẽ hiển thị tại đây.</p>
+                <div id="schedule-result"></div>
+            </div>
+        </section>
+
+        <section id="algorithm" class="page hidden">
+            <div class="card">
+                <h2>🧠 Các thuật toán</h2>
+                <p>Hệ thống hỗ trợ Greedy, Backtracking và Dynamic Programming.</p>
+                <p>Chọn thuật toán ở trang Tổng quan để chạy thử.</p>
+            </div>
+        </section>
+        <footer>ExamScheduler © 2026</footer>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

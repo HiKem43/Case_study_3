@@ -10,6 +10,7 @@
     <aside class="sidebar">
         <h2>📘 ExamScheduler</h2>
         <p>HỆ THỐNG XẾP LỊCH THI</p>
+
         <button onclick="showPage('home')">🏠 Tổng quan</button>
         <button onclick="showPage('schedule')">📅 Lịch thi</button>
         <button onclick="showPage('algorithm')">🧠 Thuật toán</button>
@@ -24,6 +25,7 @@
             <span>👤 Quản trị viên</span>
         </header>
 
+        <!-- ================= TONG QUAN ================= -->
         <section id="home" class="page">
             <div class="welcome">
                 <p>EXAM SCHEDULING SYSTEM</p>
@@ -32,44 +34,102 @@
                 <button class="primary" onclick="loadData()">📂 Đọc dữ liệu</button>
             </div>
 
+            <!-- CAC THE THONG KE -->
             <div class="stats">
-                <div class="card">
+                <button class="card stat-card"
+                        type="button"
+                        onclick="showStatistics('courses')">
                     <p>Tổng số môn thi</p>
                     <h2 id="courses">--</h2>
-                </div>
-                <div class="card">
+                    <span>Nhấn để xem chi tiết →</span>
+                </button>
+
+                <button class="card stat-card"
+                        type="button"
+                        onclick="showStatistics('rooms')">
                     <p>Số phòng thi</p>
                     <h2 id="rooms">--</h2>
-                </div>
-                <div class="card">
+                    <span>Nhấn để xem chi tiết →</span>
+                </button>
+
+                <button class="card stat-card"
+                        type="button"
+                        onclick="showStatistics('slots')">
                     <p>Số ca thi</p>
                     <h2 id="slots">--</h2>
-                </div>
-                <div class="card">
+                    <span>Nhấn để xem chi tiết →</span>
+                </button>
+
+                <button class="card stat-card"
+                        type="button"
+                        onclick="showStatistics('schedules')">
                     <p>Số lịch đã tạo</p>
                     <h2 id="total">0</h2>
-                </div>
+                    <span>Nhấn để xem chi tiết →</span>
+                </button>
             </div>
 
+            <!-- KHU VUC HIEN THI BANG THONG KE -->
+            <section id="statistics-detail" class="card statistics-detail hidden">
+                <div class="section-heading">
+                    <div>
+                        <p>THỐNG KÊ CHI TIẾT</p>
+                        <h2 id="statistics-title">Chi tiết dữ liệu</h2>
+                    </div>
+
+                    <button type="button"
+                            class="close-button"
+                            onclick="closeStatistics()">
+                        ✕ Đóng
+                    </button>
+                </div>
+
+                <p id="statistics-description">
+                    Chọn một thẻ thống kê để xem dữ liệu.
+                </p>
+
+                <div class="table-container">
+                    <table id="statistics-table">
+                        <thead id="statistics-head"></thead>
+                        <tbody id="statistics-body">
+                            <tr>
+                                <td>Hãy đọc dữ liệu để xem thống kê.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- CHAY THUAT TOAN -->
             <h2>Chạy thuật toán</h2>
+
             <div class="algorithms">
                 <div class="card">
                     <h3>⚡ Greedy</h3>
                     <p>Thuật toán tham lam</p>
-                    <button onclick="runAlgorithm('greedy')">Chạy Greedy</button>
+                    <button onclick="runAlgorithm('greedy')">
+                        Chạy Greedy
+                    </button>
                 </div>
+
                 <div class="card">
                     <h3>🔄 Backtracking</h3>
                     <p>Thuật toán quay lui</p>
-                    <button onclick="runAlgorithm('backtracking')">Chạy Backtracking</button>
+                    <button onclick="runAlgorithm('backtracking')">
+                        Chạy Backtracking
+                    </button>
                 </div>
+
                 <div class="card">
                     <h3>🧩 Dynamic Programming</h3>
                     <p>Thuật toán quy hoạch động</p>
-                    <button onclick="runAlgorithm('dp')">Chạy DP</button>
+                    <button onclick="runAlgorithm('dp')">
+                        Chạy DP
+                    </button>
                 </div>
             </div>
 
+            <!-- KET QUA XEP LICH -->
             <div class="card results">
                 <h2>Kết quả lịch thi</h2>
                 <p id="message">Hãy đọc dữ liệu và chạy một thuật toán.</p>
@@ -77,6 +137,7 @@
             </div>
         </section>
 
+        <!-- ================= LICH THI ================= -->
         <section id="schedule" class="page hidden">
             <div class="card">
                 <h2>📅 Lịch thi</h2>
@@ -85,6 +146,7 @@
             </div>
         </section>
 
+        <!-- ================= THUAT TOAN ================= -->
         <section id="algorithm" class="page hidden">
             <div class="card">
                 <h2>🧠 Các thuật toán</h2>
@@ -92,6 +154,7 @@
                 <p>Chọn thuật toán ở trang Tổng quan để chạy thử.</p>
             </div>
         </section>
+
         <footer>ExamScheduler © 2026</footer>
     </main>
 

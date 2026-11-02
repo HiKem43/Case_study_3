@@ -1,314 +1,594 @@
-{
-box-sizing: border-box;
-margin: 0;
-padding: 0;
+/* ==================== CAI DAT CHUNG ==================== */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --primary: #555bdc;
+    --primary-dark: #4248c4;
+    --primary-light: #ededff;
+    --background: #f4f6fc;
+    --text: #252943;
+    --muted: #858ba8;
+    --border: #eceef6;
+    --success: #15885b;
+    --danger: #c03952;
 }
 
 body {
-font-family: "Segoe UI", Arial, sans-serif;
-background: #f4f6fc;
-color: #252943;
-display: flex;
-min-height: 100vh;
-}
-
-.sidebar {
-width: 250px;
-min-height: 100vh;
-background: #20244a;
-color: white;
-padding: 30px 18px;
-flex-shrink: 0;
-}
-
-.sidebar h2 {
-font-size: 20px;
-margin-bottom: 10px;
-}
-
-.sidebar p {
-color: #aeb5dd;
-font-size: 11px;
-margin-bottom: 35px;
-letter-spacing: 1px;
-}
-
-.sidebar button {
-display: block;
-width: 100%;
-padding: 14px;
-margin-bottom: 10px;
-border: none;
-border-radius: 9px;
-color: #e0e3f8;
-background: transparent;
-text-align: left;
-font-size: 14px;
-cursor: pointer;
-transition: 0.2s;
-}
-
-.sidebar button {
-background: #424a85;
-color: white;
-}
-
-main {
-flex: 1;
-min-width: 0;
-padding: 30px;
-}
-
-header {
-display: flex;
-justify-content: space-between;
-align-items: center;
-gap: 15px;
-margin-bottom: 28px;
-}
-
-header p {
-color: #858ba8;
-font-size: 11px;
-margin-bottom: 8px;
-}
-
-header h1 {
-font-size: 25px;
-}
-
-header span {
-background: white;
-padding: 12px 16px;
-border-radius: 10px;
-font-size: 12px;
-box-shadow: 0 3px 15px #25294308;
-}
-
-.welcome {
-background: linear-gradient(120deg, #555bdc, #8588f4);
-padding: 32px;
-border-radius: 18px;
-color: white;
-margin-bottom: 25px;
-box-shadow: 0 8px 25px #555bdc30;
-}
-
-.welcome > p {
-font-size: 11px;
-letter-spacing: 2px;
-opacity: 0.8;
-}
-
-.welcome h2 {
-font-size: 29px;
-margin: 15px 0 10px;
-}
-
-.welcome p {
-line-height: 1.7;
-font-size: 14px;
-}
-
-.primary {
-background: white;
-color: #555bdc;
-border: none;
-padding: 12px 18px;
-border-radius: 8px;
-margin-top: 18px;
-font-weight: 700;
-cursor: pointer;
-transition: 0.2s;
-}
-
-.primary {
-background: #ededff;
-transform: translateY(-2px);
-}
-
-.stats {
-display: grid;
-grid-template-columns: repeat(4, minmax(0, 1fr));
-gap: 16px;
-margin-bottom: 30px;
-}
-
-.card {
-background: white;
-border-radius: 14px;
-padding: 22px;
-box-shadow: 0 4px 18px #25294308;
-border: 1px solid #eceef6;
-}
-
-.stats .card p {
-font-size: 12px;
-color: #858ba8;
-margin-bottom: 12px;
-}
-
-.stats .card h2 {
-font-size: 29px;
-color: #555bdc;
-}
-
-#home > h2 {
-font-size: 19px;
-margin-bottom: 17px;
-}
-
-.algorithms {
-display: grid;
-grid-template-columns: repeat(3, minmax(0, 1fr));
-gap: 17px;
-margin-bottom: 28px;
-}
-
-.algorithms .card {
-transition: 0.2s;
-}
-
-.algorithms .card {
-transform: translateY(-3px);
-box-shadow: 0 8px 25px #25294312;
-}
-
-.algorithms .card h3 {
-font-size: 16px;
-margin-bottom: 12px;
-}
-
-.algorithms .card p {
-font-size: 12px;
-color: #858ba8;
-line-height: 1.7;
-min-height: 40px;
-}
-
-.algorithms .card button {
-margin-top: 17px;
-width: 100%;
-background: #efefff;
-color: #555bdc;
-border: none;
-padding: 12px;
-border-radius: 8px;
-font-weight: 700;
-cursor: pointer;
-transition: 0.2s;
-}
-
-.algorithms .card button {
-background: #555bdc;
-color: white;
-}
-
-.results {
-margin-top: 10px;
-}
-
-.results h2 {
-font-size: 18px;
-margin-bottom: 12px;
-}
-
-.results > p {
-font-size: 13px;
-color: #858ba8;
-line-height: 1.7;
-}
-
-.result-row {
-display: flex;
-flex-wrap: wrap;
-justify-content: space-between;
-align-items: center;
-gap: 10px;
-padding: 14px 0;
-border-bottom: 1px solid #eceef6;
-font-size: 13px;
-}
-
-.badge {
-color: #15885b;
-background: #e4f8ef;
-border-radius: 20px;
-padding: 5px 10px;
-font-size: 11px;
-}
-
-.page {
-display: block;
-}
-
-.hidden {
-display: none !important;
-}
-
-footer {
-color: #999eb4;
-text-align: center;
-font-size: 11px;
-margin-top: 30px;
-padding: 15px;
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: var(--background);
+    color: var(--text);
+    display: flex;
+    min-height: 100vh;
 }
 
 button {
-font-family: inherit;
+    font-family: inherit;
 }
 
-@media (max-width: 1000px) {
-.stats {
-grid-template-columns: repeat(2, minmax(0, 1fr));
+button:focus-visible {
+    outline: 3px solid #9b9fff;
+    outline-offset: 3px;
 }
 
-.algorithms {
-    grid-template-columns: 1fr;
-}
-
-}
-
-@media (max-width: 650px) {
-body {
-display: block;
-}
+/* ==================== THANH BEN ==================== */
 
 .sidebar {
-    width: 100%;
-    min-height: auto;
-    padding: 18px;
+    width: 250px;
+    min-height: 100vh;
+    background: #20244a;
+    color: white;
+    padding: 30px 18px;
+    flex-shrink: 0;
+}
+
+.sidebar h2 {
+    font-size: 20px;
+    margin-bottom: 10px;
 }
 
 .sidebar p {
-    margin-bottom: 15px;
+    color: #aeb5dd;
+    font-size: 11px;
+    margin-bottom: 35px;
+    letter-spacing: 1px;
 }
 
 .sidebar button {
-    display: inline-block;
-    width: auto;
-    margin: 0 4px 4px 0;
-    padding: 10px;
+    display: block;
+    width: 100%;
+    padding: 14px;
+    margin-bottom: 10px;
+    border: none;
+    border-radius: 9px;
+    color: #e0e3f8;
+    background: transparent;
+    text-align: left;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
 }
 
+.sidebar button:hover {
+    background: #424a85;
+    color: white;
+    transform: translateX(3px);
+}
+
+/* ==================== NOI DUNG CHINH ==================== */
+
 main {
-    padding: 18px;
+    flex: 1;
+    min-width: 0;
+    padding: 30px;
 }
 
 header {
-    align-items: flex-start;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 28px;
+}
+
+header p {
+    color: var(--muted);
+    font-size: 11px;
+    margin-bottom: 8px;
 }
 
 header h1 {
-    font-size: 20px;
+    font-size: 25px;
 }
 
 header span {
-    font-size: 10px;
+    background: white;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 12px;
+    box-shadow: 0 3px 15px #25294308;
+    white-space: nowrap;
 }
+
+/* ==================== KHU VUC CHAO MUNG ==================== */
 
 .welcome {
-    padding: 23px;
+    background: linear-gradient(120deg, #555bdc, #8588f4);
+    padding: 32px;
+    border-radius: 18px;
+    color: white;
+    margin-bottom: 25px;
+    box-shadow: 0 8px 25px #555bdc30;
 }
 
+.welcome > p:first-child {
+    font-size: 11px;
+    letter-spacing: 2px;
+    opacity: 0.8;
+}
+
+.welcome h2 {
+    font-size: 29px;
+    margin: 15px 0 10px;
+}
+
+.welcome p {
+    line-height: 1.7;
+    font-size: 14px;
+}
+
+.primary {
+    background: white;
+    color: var(--primary);
+    border: none;
+    padding: 12px 18px;
+    border-radius: 8px;
+    margin-top: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.primary:hover {
+    background: #ededff;
+    transform: translateY(-2px);
+}
+
+/* ==================== THE THONG KE ==================== */
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 30px;
+}
+
+.card {
+    background: white;
+    border-radius: 14px;
+    padding: 22px;
+    box-shadow: 0 4px 18px #25294308;
+    border: 1px solid var(--border);
+}
+
+/* The thong ke co the bam */
+
+.stat-card {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    text-align: left;
+    color: var(--text);
+    cursor: pointer;
+    font-family: inherit;
+    transition:
+        transform 0.2s,
+        box-shadow 0.2s,
+        border-color 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    border-color: #c7c9ff;
+    box-shadow: 0 10px 25px #555bdc1c;
+}
+
+.stat-card:active {
+    transform: translateY(-1px);
+}
+
+.stat-card p {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 12px;
+}
+
+.stat-card h2 {
+    font-size: 29px;
+    color: var(--primary);
+    margin-bottom: 12px;
+}
+
+.stat-card span {
+    display: block;
+    font-size: 11px;
+    color: var(--primary);
+}
+
+/* ==================== BANG THONG KE CHI TIET ==================== */
+
+.statistics-detail {
+    margin: 0 0 30px;
+    padding: 25px;
+    scroll-margin-top: 20px;
+    animation: appear 0.25s ease-out;
+}
+
+.section-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 16px;
+}
+
+.section-heading > div > p {
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    margin-bottom: 8px;
+}
+
+.section-heading h2 {
+    font-size: 21px;
+}
+
+.statistics-detail > p {
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.7;
+    margin-bottom: 18px;
+}
+
+.close-button {
+    border: none;
+    border-radius: 8px;
+    background: #f1f2fa;
+    color: #555b75;
+    padding: 10px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s;
+}
+
+.close-button:hover {
+    background: #e2e4f5;
+}
+
+/* Cho phep bang cuon ngang khi nhieu cot */
+
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+}
+
+#statistics-table {
+    width: 100%;
+    min-width: 620px;
+    border-collapse: collapse;
+    background: white;
+    font-size: 13px;
+}
+
+#statistics-table thead {
+    background: #f0f1ff;
+}
+
+#statistics-table th {
+    color: #4147a8;
+    font-weight: 700;
+    text-align: left;
+    white-space: nowrap;
+}
+
+#statistics-table th,
+#statistics-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+}
+
+#statistics-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+#statistics-table tbody tr:hover {
+    background: #f8f8ff;
+}
+
+#statistics-table tbody td:first-child {
+    color: var(--muted);
+    width: 55px;
+}
+
+#statistics-table td[colspan] {
+    padding: 24px;
+    color: var(--muted);
+    text-align: center;
+}
+
+/* ==================== TIEU DE ==================== */
+
+#home > h2 {
+    font-size: 19px;
+    margin-bottom: 17px;
+}
+
+/* ==================== CAC THUAT TOAN ==================== */
+
+.algorithms {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 17px;
+    margin-bottom: 28px;
+}
+
+.algorithms .card {
+    min-width: 0;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.algorithms .card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px #25294312;
+}
+
+.algorithms .card h3 {
+    font-size: 16px;
+    margin-bottom: 12px;
+}
+
+.algorithms .card p {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.7;
+    min-height: 40px;
+}
+
+.algorithms .card button {
+    margin-top: 17px;
+    width: 100%;
+    background: var(--primary-light);
+    color: var(--primary);
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.algorithms .card button:hover {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-1px);
+}
+
+/* ==================== KET QUA LICH THI ==================== */
+
+.results {
+    margin-top: 10px;
+}
+
+.results h2 {
+    font-size: 18px;
+    margin-bottom: 12px;
+}
+
+.results > p {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.7;
+}
+
+.result-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+}
+
+.result-row:last-child {
+    border-bottom: none;
+}
+
+.result-row strong {
+    display: block;
+    margin-bottom: 7px;
+    color: var(--text);
+}
+
+.result-row p {
+    color: var(--muted);
+    line-height: 1.7;
+    overflow-wrap: anywhere;
+}
+
+.badge {
+    color: var(--success);
+    background: #e4f8ef;
+    border-radius: 20px;
+    padding: 5px 10px;
+    font-size: 11px;
+}
+
+/* ==================== TRANG VA CHAN TRANG ==================== */
+
+.page {
+    display: block;
+}
+
+.hidden {
+    display: none !important;
+}
+
+footer {
+    color: #999eb4;
+    text-align: center;
+    font-size: 11px;
+    margin-top: 30px;
+    padding: 15px;
+}
+
+/* ==================== HIEU UNG ==================== */
+
+@keyframes appear {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ==================== MAY TINH BANG ==================== */
+
+@media (max-width: 1100px) {
+    main {
+        padding: 24px;
+    }
+
+    .stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .algorithms {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ==================== DIEN THOAI ==================== */
+
+@media (max-width: 650px) {
+    body {
+        display: block;
+    }
+
+    .sidebar {
+        width: 100%;
+        min-height: auto;
+        padding: 18px;
+    }
+
+    .sidebar h2 {
+        font-size: 19px;
+    }
+
+    .sidebar p {
+        margin-bottom: 15px;
+    }
+
+    .sidebar button {
+        display: inline-block;
+        width: auto;
+        margin: 0 4px 4px 0;
+        padding: 10px;
+    }
+
+    main {
+        padding: 18px;
+    }
+
+    header {
+        align-items: flex-start;
+    }
+
+    header h1 {
+        font-size: 20px;
+    }
+
+    header span {
+        font-size: 10px;
+        padding: 9px;
+    }
+
+    .welcome {
+        padding: 23px;
+    }
+
+    .welcome h2 {
+        font-size: 25px;
+    }
+
+    .stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .stat-card {
+        padding: 16px;
+    }
+
+    .stat-card h2 {
+        font-size: 25px;
+    }
+
+    .stat-card span {
+        font-size: 10px;
+    }
+
+    .statistics-detail {
+        padding: 16px;
+    }
+
+    .section-heading {
+        align-items: flex-start;
+    }
+
+    .section-heading h2 {
+        font-size: 18px;
+    }
+
+    .close-button {
+        padding: 9px;
+    }
+
+    .algorithms {
+        grid-template-columns: 1fr;
+    }
+
+    .card {
+        padding: 18px;
+    }
+}
+
+/* ==================== DIEN THOAI NHO ==================== */
+
+@media (max-width: 380px) {
+    .stats {
+        grid-template-columns: 1fr;
+    }
+
+    header {
+        flex-direction: column;
+    }
+
+    .section-heading {
+        flex-direction: column;
+    }
 }

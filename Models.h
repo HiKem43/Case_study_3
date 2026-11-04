@@ -103,27 +103,27 @@ inline bool isValidName(const string& name) {
 
 inline bool isValidDate(const string& date) {
     if (date.length() != 10 ||
-        date[4] != '-' || date[7] != '-') {
+        date[2] != '-' || date[5] != '-') {
         return false;
     }
 
     for (int i = 0; i < 10; i++) {
-        if (i != 4 && i != 7 &&
+        if (i != 2 && i != 5 &&
             !isdigit((unsigned char)date[i])) {
             return false;
         }
     }
 
-    int year = (date[0] - '0') * 1000
-             + (date[1] - '0') * 100
-             + (date[2] - '0') * 10
-             + (date[3] - '0');
+    int day = (date[0] - '0') * 10
+            + (date[1] - '0');
 
-    int month = (date[5] - '0') * 10
-              + (date[6] - '0');
+    int month = (date[3] - '0') * 10
+              + (date[4] - '0');
 
-    int day = (date[8] - '0') * 10
-            + (date[9] - '0');
+    int year = (date[6] - '0') * 1000
+             + (date[7] - '0') * 100
+             + (date[8] - '0') * 10
+             + (date[9] - '0');
 
     if (year < 1900 || month < 1 || month > 12) {
         return false;

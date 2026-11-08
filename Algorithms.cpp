@@ -34,3 +34,10 @@ vector<Schedule> runBacktrackingScheduler(
         courses, rooms, slots, courseStudentsMap, failedCourses
     );
 }
+vector<Schedule> result = DPScheduler::runDPScheduler(
+    courses,
+    rooms,
+    slots,
+    courseStudentsMap,
+    failedCourses
+);

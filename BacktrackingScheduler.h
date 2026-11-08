@@ -9,6 +9,51 @@
 
 using namespace std;
 
+// Một nhóm thí sinh thuộc một lịch thi cụ thể trong một phòng.
+// Một phòng có thể được sử dụng ở nhiều ca khác nhau, vì vậy dữ liệu
+// được chia theo từng lịch thi thay vì gộp tất cả thí sinh vào một danh sách.
+struct RoomCandidateGroup {
+    string scheduleId;
+    string roomId;
+    string courseId;
+    string startTime;
+    string endTime;
+    vector<Student> students;
+};
+
+// Khóa là mã phòng; giá trị là các lịch thi được xếp vào phòng đó.
+using RoomCandidateMap = unordered_map<string, vector<RoomCandidateGroup>>;
+
+
+// Ham trung gian duoc khai bao tai day de chi can sua 2 file.
+// Overload 5 tham so giu tuong thich voi code cu.
+vector<Schedule> runBacktrackingScheduler(
+    const vector<Course>& courses,
+    const vector<ExamRoom>& rooms,
+    const vector<TimeSlot>& slots,
+    const unordered_map<string, vector<Student>>& courseStudentsMap,
+    vector<string>& failedCourses
+);
+
+// Overload 6 tham so giu nguyen kieu goi con tro cua code hien tai.
+vector<Schedule> runBacktrackingScheduler(
+    const vector<Course>& courses,
+    const vector<ExamRoom>& rooms,
+    const vector<TimeSlot>& slots,
+    const unordered_map<string, vector<Student>>& courseStudentsMap,
+    vector<string>& failedCourses,
+    RoomCandidateMap* roomCandidatesByRoom
+);
+
+// Tra cứu dữ liệu theo mã phòng; nullptr nghĩa là mã phòng không tồn tại.
+inline const vector<RoomCandidateGroup>* getCandidatesByRoomId(
+    const RoomCandidateMap& roomCandidatesByRoom,
+    const string& roomId
+) {
+    auto it = roomCandidatesByRoom.find(roomId);
+    return it == roomCandidatesByRoom.end() ? nullptr : &it->second;
+}
+
 class BacktrackingScheduler {
 private:
     vector<Course> validCourses;
@@ -232,10 +277,19 @@ public:
         const vector<ExamRoom>& rooms,
         const vector<TimeSlot>& slots,
         const unordered_map<string, vector<Student>>& courseStudentsMap,
-        vector<string>& failedCourses
+        vector<string>& failedCourses,
+        RoomCandidateMap* roomCandidatesByRoom = nullptr
     ) {
         vector<Schedule> result;
         failedCourses.clear();
+
+        // Khởi tạo nơi lưu dữ liệu cho tất cả phòng, kể cả phòng chưa được sử dụng.
+        if (roomCandidatesByRoom != nullptr) {
+            roomCandidatesByRoom->clear();
+            for (const auto& room : rooms) {
+                (*roomCandidatesByRoom)[room.getRoomId()] = {};
+            }
+        }
 
         if (courses.empty() || rooms.empty() || slots.empty()) {
             for (const auto& c : courses) failedCourses.push_back(c.getCourseId());
@@ -254,13 +308,33 @@ public:
             int rIdx = solver.bestRoom[i];
 
             if (sIdx != -1 && rIdx != -1) {
-                Schedule sch(makeScheduleId(counter++), course, solver.sortedRooms[rIdx], slots[sIdx]);
+                const string scheduleId = makeScheduleId(counter++);
+                const ExamRoom& assignedRoom = solver.sortedRooms[rIdx];
+                const TimeSlot& assignedSlot = slots[sIdx];
+
+                Schedule sch(scheduleId, course, assignedRoom, assignedSlot);
+
+                // Lưu danh sách thí sinh của lịch thi hiện tại.
+                RoomCandidateGroup roomGroup;
+                roomGroup.scheduleId = scheduleId;
+                roomGroup.roomId = assignedRoom.getRoomId();
+                roomGroup.courseId = cId;
+                roomGroup.startTime = assignedSlot.getStartTime();
+                roomGroup.endTime = assignedSlot.getEndTime();
+
                 auto it = courseStudentsMap.find(cId);
                 if (it != courseStudentsMap.end()) {
                     for (const auto& st : it->second) {
                         sch.addStudent(st);
+                        roomGroup.students.push_back(st);
                     }
                 }
+
+                // Lưu vào kho theo mã phòng để UI tra cứu khi người dùng nhấn vào phòng.
+                if (roomCandidatesByRoom != nullptr) {
+                    (*roomCandidatesByRoom)[roomGroup.roomId].push_back(roomGroup);
+                }
+
                 result.push_back(sch);
             }
             else {

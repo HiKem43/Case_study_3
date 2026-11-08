@@ -94,14 +94,23 @@ void printResults(
     }
 }
 
-int main() {
-    if (!setWorkingDirectoryToDataRoot()) {
+int main(int argc, char* argv[]) {
+    if (argc > 2) {
+        cerr << "Cach dung: " << argv[0]
+             << " [duong_dan_file_config]" << endl;
+        return 1;
+    }
+
+    string configFile = "data/data_Config.txt";
+    if (argc == 2) {
+        configFile = argv[1];
+    } else if (!setWorkingDirectoryToDataRoot()) {
         return 1;
     }
 
     DataProcessor dataProcessor;
 
-    if (!dataProcessor.loadFromFile("data/data_Config.txt")) {
+    if (!dataProcessor.loadFromFile(configFile)) {
         cerr << "Khong the doc du lieu!" << endl;
         return 1;
     }

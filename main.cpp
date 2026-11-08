@@ -1,6 +1,8 @@
 #include <iostream>
 #include <chrono>
+#include <filesystem>
 #include <string>
+#include <system_error>
 #include <unordered_map>
 #include <vector>
 #include "DataProcessor.h"
@@ -9,6 +11,53 @@
 #include "BacktrackingScheduler.h"
 
 using namespace std;
+namespace fs = std::filesystem;
+
+static bool setWorkingDirectoryToDataRoot() {
+    const fs::path configRelativePath = fs::path("data") / "data_Config.txt";
+    error_code error;
+
+    auto isRegularFile = [&error](const fs::path& path) {
+        error.clear();
+        const bool regularFile = fs::is_regular_file(path, error);
+        if (error == errc::no_such_file_or_directory || error == errc::not_a_directory) {
+            error.clear();
+        }
+        return regularFile;
+    };
+
+    fs::path directory = fs::current_path(error);
+    if (error) {
+        cerr << "Khong the xac dinh thu muc lam viec: " << error.message() << endl;
+        return false;
+    }
+
+    while (!directory.empty()) {
+        const fs::path candidate = directory / configRelativePath;
+        if (isRegularFile(candidate)) {
+            fs::current_path(directory, error);
+            if (error) {
+                cerr << "Khong the chuyen den thu muc du lieu: " << error.message() << endl;
+                return false;
+            }
+            return true;
+        }
+        if (error) {
+            cerr << "Khong the kiem tra file du lieu: " << error.message() << endl;
+            return false;
+        }
+
+        const fs::path parent = directory.parent_path();
+        if (parent == directory) {
+            break;
+        }
+        directory = parent;
+    }
+
+    cerr << "Khong tim thay data/data_Config.txt trong thu muc hien tai "
+         << "hoac cac thu muc cha." << endl;
+    return false;
+}
 
 void printResults(
     const string& algorithmName,
@@ -46,6 +95,10 @@ void printResults(
 }
 
 int main() {
+    if (!setWorkingDirectoryToDataRoot()) {
+        return 1;
+    }
+
     DataProcessor dataProcessor;
 
     if (!dataProcessor.loadFromFile("data/data_Config.txt")) {
@@ -73,28 +126,30 @@ int main() {
 
     cout << "Du lieu hop le. Bat dau chay cac thuat toan xep lich." << endl;
 
-    vector<string> failedCourses;
+    vector<string> greedyFailedCourses;
     auto start = chrono::steady_clock::now();
     vector<Schedule> greedySchedules = GreedyScheduler::schedule(
-        courses, rooms, timeSlots, courseStudentsMap, failedCourses
+        courses, rooms, timeSlots, courseStudentsMap, greedyFailedCourses
     );
     auto elapsed = chrono::duration_cast<chrono::microseconds>(
         chrono::steady_clock::now() - start
     ).count();
-    printResults("Thuat toan tham lam (Greedy)", greedySchedules, failedCourses, elapsed);
+    printResults("Thuat toan tham lam (Greedy)", greedySchedules, greedyFailedCourses, elapsed);
 
+    vector<string> dpFailedCourses;
     start = chrono::steady_clock::now();
     vector<Schedule> dpSchedules = DPScheduler::runDPScheduler(
-        courses, rooms, timeSlots, courseStudentsMap, failedCourses
+        courses, rooms, timeSlots, courseStudentsMap, dpFailedCourses
     );
     elapsed = chrono::duration_cast<chrono::microseconds>(
         chrono::steady_clock::now() - start
     ).count();
-    printResults("Quy hoach dong (DP)", dpSchedules, failedCourses, elapsed);
+    printResults("Quy hoach dong (DP)", dpSchedules, dpFailedCourses, elapsed);
 
+    vector<string> backtrackingFailedCourses;
     start = chrono::steady_clock::now();
     vector<Schedule> backtrackingSchedules = BacktrackingScheduler::schedule(
-        courses, rooms, timeSlots, courseStudentsMap, failedCourses
+        courses, rooms, timeSlots, courseStudentsMap, backtrackingFailedCourses
     );
     elapsed = chrono::duration_cast<chrono::microseconds>(
         chrono::steady_clock::now() - start
@@ -102,7 +157,7 @@ int main() {
     printResults(
         "Quay lui va cat tia (Backtracking)",
         backtrackingSchedules,
-        failedCourses,
+        backtrackingFailedCourses,
         elapsed
     );
 

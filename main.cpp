@@ -58,7 +58,6 @@ int main() {
         return 1;
     }
 
-    dataProcessor.buildConflictGraph();
 
     const vector<Course> courses = dataProcessor.getCourses();
     const vector<Student> students = dataProcessor.getStudents();

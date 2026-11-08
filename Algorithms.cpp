@@ -39,5 +39,4 @@ vector<Schedule> result = DPScheduler::runDPScheduler(
     rooms,
     slots,
     courseStudentsMap,
-    failedCourses
-);
+    failedCourses);

@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <unordered_map>
 #include <unordered_set>
+#include <fstream>
+#include <filesystem>
 #include "Models.h"
 #include "ConflictGraph.h"
 
@@ -22,14 +24,94 @@ private:
     int numSlots;
 
     // Trạng thái hiện tại trong quá trình Quay lui
-    vector<int> currentSlot; // currentSlot[i]: chỉ số ca thi của môn i (-1 nếu không xếp được)
-    vector<int> currentRoom; // currentRoom[i]: chỉ số phòng thi của môn i (-1 nếu không xếp được)
+    vector<int> currentSlot;
+    vector<int> currentRoom;
 
     // Lưu nghiệm tốt nhất (Best Solution) phục vụ Cắt tỉa (Pruning)
     vector<int> bestSlot;
     vector<int> bestRoom;
-    int bestAssignedCount; // Kỷ lục: Số môn xếp lịch thành công nhiều nhất (ưu tiên 1 - càng lớn càng tốt)
-    int bestMaxSlotIndex;  // Kỷ lục: Chỉ số ca thi lớn nhất phải dùng (ưu tiên 2 - càng nhỏ càng tốt)
+    int bestAssignedCount;
+    int bestMaxSlotIndex;
+
+    // ==================== BỘ LƯU TRỮ TRUY XUẤT CHO GIAO DIỆN (UI) ====================
+    // Sử dụng inline static để lưu giữ dữ liệu và đường dẫn ngay sau khi schedule() chạy xong
+    inline static unordered_map<string, string> roomFilePaths;               // Map: Mã Phòng -> Đường dẫn file
+    inline static unordered_map<string, vector<Student>> roomStudentsMap;    // Map: Mã Phòng -> Danh sách thí sinh
+    inline static unordered_map<string, vector<Schedule>> roomSchedulesMap;  // Map: Mã Phòng -> Các ca thi tại phòng đó
+
+    // Tự động lưu dữ liệu từng phòng ra file và cập nhật đường dẫn truy xuất
+    static void saveRoomStudentData(
+        const vector<Schedule>& schedules,
+        const vector<ExamRoom>& allRooms,
+        const string& baseDir = "data/room_students"
+    ) {
+        namespace fs = std::filesystem;
+        roomFilePaths.clear();
+        roomStudentsMap.clear();
+        roomSchedulesMap.clear();
+
+        error_code ec;
+        fs::create_directories(baseDir, ec);
+
+        // 1. Gom nhóm lịch thi và thí sinh theo từng phòng trên RAM
+        for (const auto& sch : schedules) {
+            string rId = normalizeCode(sch.getRoom().getRoomId());
+            roomSchedulesMap[rId].push_back(sch);
+
+            vector<Student> sts = sch.getStudents();
+            for (const auto& st : sts) {
+                roomStudentsMap[rId].push_back(st);
+            }
+        }
+
+        // 2. Ghi file cho từng phòng và lưu lại đường dẫn
+        for (const auto& room : allRooms) {
+            string rId = normalizeCode(room.getRoomId());
+            string filePath = (fs::path(baseDir) / (rId + ".txt")).generic_string();
+            roomFilePaths[rId] = filePath;
+
+            ofstream out(filePath.c_str());
+            if (!out.is_open()) continue;
+
+            out << "ROOM|" << rId << "|CAPACITY|" << room.getCapacity() << "\n";
+
+            auto it = roomSchedulesMap.find(rId);
+            if (it != roomSchedulesMap.end()) {
+                for (const auto& sch : it->second) {
+                    Course c = sch.getCourse();
+                    TimeSlot t = sch.getTimeSlot();
+                    vector<Student> students = sch.getStudents();
+
+                    out << "SCHEDULE|" << sch.getScheduleId()
+                        << "|" << t.getTimeSlotId()
+                        << "|" << t.getExamDate()
+                        << "|" << t.getStartTime() << "-" << t.getEndTime()
+                        << "|" << c.getCourseId()
+                        << "|" << c.getCourseName()
+                        << "|" << students.size() << "\n";
+
+                    for (const auto& st : students) {
+                        out << "STUDENT|" << st.getStudentId()
+                            << "|" << st.getFullName()
+                            << "|" << st.getDateOfBirth()
+                            << "|" << st.getGender() << "\n";
+                    }
+                }
+            }
+            out.close();
+        }
+
+        // 3. Tạo file index_paths.txt tổng hợp: Mã_Phòng|Đường_Dẫn
+        string indexPath = (fs::path(baseDir) / "index_paths.txt").generic_string();
+        ofstream idxOut(indexPath.c_str());
+        if (idxOut.is_open()) {
+            for (const auto& room : allRooms) {
+                string rId = normalizeCode(room.getRoomId());
+                idxOut << rId << "|" << roomFilePaths[rId] << "\n";
+            }
+            idxOut.close();
+        }
+    }
 
     // Tạo mã lịch thi tự động tăng: SCH001, SCH002... (đồng bộ với GreedyScheduler)
     static string makeScheduleId(int n) {
@@ -53,37 +135,32 @@ private:
     }
 
     // 1. KIỂM TRA CA THI HỢP LỆ & TÌM PHÒNG PHÙ HỢP
-    // Trả về chỉ số phòng hợp lệ (tối ưu sức chứa nhất) cho môn courseIdx tại ca slotIdx, hoặc -1 nếu không hợp lệ
     int findValidRoomForSlot(int courseIdx, int slotIdx) const {
         const Course& course = validCourses[courseIdx];
         const TimeSlot& slot = slots[slotIdx];
 
-        // Kiểm tra tính hợp lệ của ca thi và thời lượng làm bài
         if (!slot.isValid() || !isSlotDurationEnough(course, slot)) {
             return -1;
         }
 
         string cId = course.getCourseId();
 
-        // Kiểm tra xung đột sinh viên với các môn đã xếp trước đó (tính cả các ca trùng giờ overlaps)
         for (int i = 0; i < courseIdx; ++i) {
             int prevSlot = currentSlot[i];
             if (prevSlot != -1 && slots[prevSlot].overlaps(slot)) {
                 if (graph.hasConflict(cId, validCourses[i].getCourseId())) {
-                    return -1; // Bị trùng lịch sinh viên
+                    return -1;
                 }
             }
         }
 
         int need = getStudentCount(cId);
 
-        // Tìm phòng trống đủ sức chứa (sortedRooms đã sắp xếp tăng dần theo capacity)
         for (int r = 0; r < numRooms; ++r) {
             if (!sortedRooms[r].isValid() || sortedRooms[r].getCapacity() < need) {
                 continue;
             }
 
-            // Kiểm tra phòng r có bị môn nào trước đó chiếm trong ca trùng giờ không
             bool roomBusy = false;
             for (int i = 0; i < courseIdx; ++i) {
                 if (currentSlot[i] != -1 && currentRoom[i] == r) {
@@ -95,30 +172,25 @@ private:
             }
 
             if (!roomBusy) {
-                return r; // Chọn ngay phòng vừa khít nhất (Cắt tỉa các phòng lớn hơn không cần thiết)
+                return r;
             }
         }
 
-        return -1; // Không có phòng trống thỏa mãn trong ca này
+        return -1;
     }
 
     // 2. HÀM ĐỆ QUY, QUAY LUI VÀ CẮT TỈA
     void backtrack(int courseIdx, int assignedCount, int maxSlotUsed) {
         int remaining = numCourses - courseIdx;
 
-        // [CẮT TỈA 1 - PRUNING]: Nếu dù xếp thành công toàn bộ các môn còn lại
-        // mà vẫn ít hơn kỷ lục số môn đã xếp được tốt nhất -> Cắt nhánh
         if (assignedCount + remaining < bestAssignedCount) {
             return;
         }
 
-        // [CẮT TỈA 2 - PRUNING]: Nếu tối đa chỉ có thể bằng số môn kỷ lục,
-        // nhưng số ca thi hiện tại đã >= kỷ lục ca thi tốt nhất -> Cắt nhánh
         if (assignedCount + remaining == bestAssignedCount && maxSlotUsed >= bestMaxSlotIndex) {
             return;
         }
 
-        // [ĐIỀU KIỆN DỪNG]: Đã duyệt xong tất cả các môn học
         if (courseIdx == numCourses) {
             if (assignedCount > bestAssignedCount ||
                 (assignedCount == bestAssignedCount && maxSlotUsed < bestMaxSlotIndex)) {
@@ -130,32 +202,25 @@ private:
             return;
         }
 
-        // Duyệt thử từng ca thi cho môn học hiện tại (courseIdx)
         for (int s = 0; s < numSlots; ++s) {
             int nextMaxSlot = max(maxSlotUsed, s + 1);
 
-            // [CẮT TỈA SỚM TRONG VÒNG LẶP]: Nếu đã đạt tối đa số môn và ca s làm vượt kỷ lục ca thi -> Bỏ qua
             if (assignedCount + remaining == bestAssignedCount && nextMaxSlot >= bestMaxSlotIndex) {
                 continue;
             }
 
             int r = findValidRoomForSlot(courseIdx, s);
             if (r != -1) {
-                // --- THỬ (DO) ---
                 currentSlot[courseIdx] = s;
                 currentRoom[courseIdx] = r;
 
-                // --- ĐỆ QUY (RECURSE) ---
                 backtrack(courseIdx + 1, assignedCount + 1, nextMaxSlot);
 
-                // --- QUAY LUI (BACKTRACK / UNDO) ---
                 currentSlot[courseIdx] = -1;
                 currentRoom[courseIdx] = -1;
             }
         }
 
-        // Nhánh dự phòng: Trong trường hợp môn học không thể xếp vào bất kỳ ca nào
-        // (cho phép bỏ qua môn này để xếp tiếp các môn còn lại giống cơ chế failedCourses của Greedy)
         if (assignedCount + remaining - 1 >= bestAssignedCount) {
             currentSlot[courseIdx] = -1;
             currentRoom[courseIdx] = -1;
@@ -172,13 +237,11 @@ public:
         vector<string>& invalidOrDuplicateFailed
     ) : slots(slots), courseStudentsMap(courseStudentsMap) {
 
-        // Dựng đồ thị xung đột từ dữ liệu
         graph.buildFromData(courseStudentsMap);
         for (const auto& c : courses) {
             graph.addCourse(c.getCourseId());
         }
 
-        // Lọc các môn không hợp lệ hoặc bị trùng mã (đồng bộ với GreedyScheduler)
         unordered_set<string> processedCourses;
         for (const auto& c : courses) {
             string cId = c.getCourseId();
@@ -192,7 +255,6 @@ public:
             validCourses.push_back(c);
         }
 
-        // Sắp xếp môn học theo bậc xung đột giảm dần (Heuristic giúp cắt tỉa sớm hiệu quả hơn)
         sort(validCourses.begin(), validCourses.end(), [&](const Course& a, const Course& b) {
             int da = graph.getDegree(a.getCourseId());
             int db = graph.getDegree(b.getCourseId());
@@ -203,15 +265,14 @@ public:
             if (sa != sb) return sa > sb;
 
             return a.getCourseId() < b.getCourseId();
-            });
+        });
 
-        // Sắp xếp phòng thi tăng dần theo sức chứa
         sortedRooms = rooms;
         sort(sortedRooms.begin(), sortedRooms.end(), [](const ExamRoom& a, const ExamRoom& b) {
             if (a.getCapacity() != b.getCapacity())
                 return a.getCapacity() < b.getCapacity();
             return a.getRoomId() < b.getRoomId();
-            });
+        });
 
         numCourses = (int)validCourses.size();
         numRooms = (int)sortedRooms.size();
@@ -226,7 +287,7 @@ public:
         bestMaxSlotIndex = numSlots + 1;
     }
 
-    // Hàm tĩnh gọi thực thi thuật toán Quay lui & Cắt tỉa (đồng bộ chữ ký với GreedyScheduler::schedule)
+    // Hàm tĩnh gọi thực thi thuật toán Quay lui & Cắt tỉa
     static vector<Schedule> schedule(
         const vector<Course>& courses,
         const vector<ExamRoom>& rooms,
@@ -268,6 +329,57 @@ public:
             }
         }
 
+        // TỰ ĐỘNG LƯU DANH SÁCH THÍ SINH TỪNG PHÒNG VÀ ĐƯỜNG DẪN TRUY XUẤT NGAY KHI XẾP XONG
+        saveRoomStudentData(result, rooms);
+
         return result;
+    }
+
+    // ==================== CÁC HÀM ĐỂ UI LẤY ĐƯỜNG DẪN & THÍ SINH ====================
+
+    // 1. Lấy đường dẫn file chứa danh sách thí sinh của 1 phòng (VD: truyền "R01" -> trả về "data/room_students/R01.txt")
+    static string getRoomFilePath(const string& roomId) {
+        string rId = normalizeCode(roomId);
+        auto it = roomFilePaths.find(rId);
+        if (it != roomFilePaths.end()) {
+            return it->second;
+        }
+        return "data/room_students/" + rId + ".txt";
+    }
+
+    // 2. Lấy toàn bộ bảng ánh xạ (Mã Phòng -> Đường dẫn file)
+    static const unordered_map<string, string>& getAllRoomFilePaths() {
+        return roomFilePaths;
+    }
+
+    // 3. Lấy trực tiếp danh sách thí sinh của 1 phòng trên RAM (nếu UI không muốn đọc lại từ file)
+    static vector<Student> getStudentsInRoom(const string& roomId) {
+        string rId = normalizeCode(roomId);
+        auto it = roomStudentsMap.find(rId);
+        return it == roomStudentsMap.end() ? vector<Student>{} : it->second;
+    }
+
+    // 4. Lấy danh sách thí sinh của 1 phòng tại 1 ca thi cụ thể
+    static vector<Student> getStudentsInRoomAtSlot(const string& roomId, const string& timeSlotId) {
+        string rId = normalizeCode(roomId);
+        string sId = normalizeCode(timeSlotId);
+        auto it = roomSchedulesMap.find(rId);
+        if (it != roomSchedulesMap.end()) {
+            for (const auto& sch : it->second) {
+                if (sch.getTimeSlot().getTimeSlotId() == sId) {
+                    return sch.getStudents();
+                }
+            }
+        }
+        return {};
+    }
+
+    // 5. Cho phép lưu danh sách thí sinh của bất kỳ lịch thi nào (Greedy/DP) vào chung hệ thống đường dẫn
+    static void exportSchedulesToRoomFiles(
+        const vector<Schedule>& schedules,
+        const vector<ExamRoom>& allRooms,
+        const string& baseDir = "data/room_students"
+    ) {
+        saveRoomStudentData(schedules, allRooms, baseDir);
     }
 };

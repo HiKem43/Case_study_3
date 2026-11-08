@@ -1,4 +1,3 @@
-
 #pragma once
 #include <iostream>
 #include <fstream>
@@ -14,6 +13,8 @@ using namespace std;
 // ==================================================
 
 // Tach mot chuoi thanh cac phan dua vao ky tu phan cach
+// Vi du: C01|Cau truc du lieu|90
+// Ket qua: C01, Cau truc du lieu, 90
 inline vector<string> splitString(const string& s, char kyTu) {
     vector<string> ketQua;
     string phan;

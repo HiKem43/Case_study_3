@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#555bdc">
+    <title>ExamScheduler - Quản lý lịch thi</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main>
+        <header class="app-header">
+            <div class="header-brand">
+                <p>EXAMSCHEDULER / TRANG CHỦ</p>
+                <h1>Hệ thống xếp lịch thi</h1>
+            </div>
+
+            <nav class="top-nav" aria-label="Điều hướng chính">
+                <button type="button" class="nav-button active" data-page="home"
+                        onclick="showPage('home')">🏠 Tổng quan</button>
+                <button type="button" class="nav-button" data-page="schedule"
+                        onclick="showPage('schedule')">📅 Lịch thi</button>
+                <button type="button" class="nav-button" data-page="algorithm"
+                        onclick="showPage('algorithm')">🧠 Thuật toán</button>
+            </nav>
+
+            <span class="admin-label">👤 Quản trị viên</span>
+        </header>
+
+        <section id="home" class="page">
+            <div class="welcome">
+                <p>EXAM SCHEDULING SYSTEM</p>
+                <h2>Xin chào! 👋</h2>
+                <p>Quản lý dữ liệu và tạo lịch thi bằng các thuật toán thông minh.</p>
+                <button class="primary" type="button" onclick="loadData()">📂 Đọc dữ liệu</button>
+            </div>
+
+            <div class="stats">
+                <button class="card stat-card" type="button" onclick="showStatistics('courses')">
+                    <p>Tổng số môn thi</p>
+                    <h2 id="courses">--</h2>
+                    <span>Nhấn để xem chi tiết →</span>
+                </button>
+
+                <button class="card stat-card" type="button" onclick="showStatistics('rooms')">
+                    <p>Số phòng thi</p>
+                    <h2 id="rooms">--</h2>
+                    <span>Nhấn để xem chi tiết →</span>
+                </button>
+
+                <button class="card stat-card" type="button" onclick="showStatistics('slots')">
+                    <p>Số ca thi</p>
+                    <h2 id="slots">--</h2>
+                    <span>Nhấn để xem chi tiết →</span>
+                </button>
+
+                <button class="card stat-card" type="button" onclick="showStatistics('schedules')">
+                    <p>Số lịch đã tạo</p>
+                    <h2 id="total">0</h2>
+                    <span>Nhấn để xem chi tiết →</span>
+                </button>
+
+                <button class="card stat-card" type="button" onclick="showStatistics('students')">
+                    <p>Tổng số sinh viên</p>
+                    <h2 id="students">--</h2>
+                    <span>Nhấn để xem chi tiết →</span>
+                </button>
+            </div>
+
+            <section id="statistics-detail" class="card statistics-detail hidden">
+                <div class="section-heading">
+                    <div>
+                        <p>THỐNG KÊ CHI TIẾT</p>
+                        <h2 id="statistics-title">Chi tiết dữ liệu</h2>
+                    </div>
+                    <button type="button" class="close-button" onclick="closeStatistics()">
+                        ✕ Đóng
+                    </button>
+                </div>
+
+                <p id="statistics-description">Chọn một thẻ thống kê để xem dữ liệu.</p>
+
+                <div class="table-container">
+                    <table id="statistics-table">
+                        <thead id="statistics-head"></thead>
+                        <tbody id="statistics-body">
+                            <tr><td>Hãy đọc dữ liệu để xem thống kê.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="content-section">
+                <div class="section-title">
+                    <div>
+                        <p class="eyebrow">TỰ ĐỘNG HÓA</p>
+                        <h2>Chạy thuật toán</h2>
+                    </div>
+                    <p class="section-hint">Chọn phương pháp để tạo lịch thi.</p>
+                </div>
+
+                <div class="algorithms">
+                    <div class="card">
+                        <h3>⚡ Greedy</h3>
+                        <p>Thuật toán tham lam, ưu tiên xếp nhanh các môn thi theo thứ tự phù hợp.</p>
+                        <button type="button" onclick="runAlgorithm('greedy')">Chạy Greedy</button>
+                    </div>
+
+                    <div class="card">
+                        <h3>🔄 Backtracking</h3>
+                        <p>Thử các phương án xếp lịch và quay lui khi phát hiện xung đột.</p>
+                        <button type="button" onclick="runAlgorithm('backtracking')">Chạy Backtracking</button>
+                    </div>
+
+                    <div class="card">
+                        <h3>🧩 Dynamic Programming</h3>
+                        <p>Quy hoạch động để tìm phương án xếp lịch theo trạng thái bài toán.</p>
+                        <button type="button" onclick="runAlgorithm('dp')">Chạy DP</button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card results">
+                <div class="section-title results-heading">
+                    <div>
+                        <p class="eyebrow">KẾT QUẢ THỰC THI</p>
+                        <h2>Kết quả lịch thi</h2>
+                    </div>
+                </div>
+                <p id="message" role="status" aria-live="polite">Hãy đọc dữ liệu và chạy một thuật toán.</p>
+                <div id="result"></div>
+            </section>
+        </section>
+
+        <section id="schedule" class="page hidden">
+            <section class="card schedule-page-card">
+                <div class="section-title">
+                    <div>
+                        <p class="eyebrow">TRA CỨU VÀ THEO DÕI</p>
+                        <h2>📅 Lịch thi theo phòng</h2>
+                    </div>
+                </div>
+                <p class="page-description">
+                    Chọn phòng thi trong bộ lọc để xem các môn, thời gian thi và danh sách sinh viên tương ứng.
+                </p>
+                <div id="schedule-result"></div>
+            </section>
+        </section>
+
+        <section id="algorithm" class="page hidden">
+            <section class="card algorithm-info-card">
+                <p class="eyebrow">CÁC PHƯƠNG PHÁP XẾP LỊCH</p>
+                <h2>🧠 Thuật toán</h2>
+                <p>Hệ thống hỗ trợ ba phương pháp: Greedy, Backtracking và Dynamic Programming.</p>
+                <p>Quay lại trang Tổng quan để chọn thuật toán và chạy thử trên dữ liệu hiện tại.</p>
+                <button class="primary primary-filled" type="button" onclick="showPage('home')">
+                    Về trang tổng quan
+                </button>
+            </section>
+        </section>
+
+        <footer>ExamScheduler © 2026</footer>
+    </main>
+
+    <script src="script.js"></script>
+    <script>
+        const originalShowPage = window.showPage;
+
+        window.showPage = function(page) {
+            originalShowPage(page);
+
+            document.querySelectorAll(".nav-button").forEach(button => {
+                const active = button.dataset.page === page;
+                button.classList.toggle("active", active);
+
+                if (active) {
+                    button.setAttribute("aria-current", "page");
+                } else {
+                    button.removeAttribute("aria-current");
+                }
+            });
+        };
+    </script>
+</body>
+</html>

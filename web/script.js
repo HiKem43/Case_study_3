@@ -98,10 +98,12 @@ async function loadData() {
         const students = getStudentsFromData(data);
 
         const totalStudents =
-            data.totalStudents ??
-            data.studentCount ??
-            data.total_students ??
-            (students.length > 0 ? students.length : "--");
+    data.totalStudents ??
+    data.studentCount ??
+    data.total_students ??
+    (typeof data.students === "number"
+        ? data.students
+        : (students.length > 0 ? students.length : "--"));
 
         document.getElementById("students").textContent =
             totalStudents;
@@ -758,10 +760,18 @@ function showStatistics(type) {
         const students = getStudentsFromData(examData);
 
         if (students.length === 0) {
-            showEmpty(
-                "API chưa trả về danh sách sinh viên. Cần bổ sung dữ liệu sinh viên trong API C++."
-            );
-        } else {
+    const totalStudents =
+        typeof examData.students === "number"
+            ? examData.students
+            : examData.totalStudents ??
+              examData.studentCount ??
+              examData.total_students ??
+              0;
+
+    showEmpty(
+        `Tổng số sinh viên: ${totalStudents}. API hiện chưa trả về danh sách mã sinh viên và họ tên chi tiết.`
+    );
+} else {
             students.forEach((student, index) => {
                 makeRow([
                     index + 1,
@@ -806,7 +816,5 @@ function closeStatistics() {
     }
 }
 
-// ======================================================
-// TU DONG DOC DU LIEU KHI MO TRANG
-// ======================================================
+
 

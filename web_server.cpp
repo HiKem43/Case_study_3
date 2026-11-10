@@ -285,6 +285,24 @@ json << ",\"courses\":" << courses.size();
 json << ",\"rooms\":" << rooms.size();
 json << ",\"slots\":" << slots.size();
 json << ",\"students\":" << students.size();
+// DANH SACH DAY DU SINH VIEN
+
+json << ",\"studentList\":[";
+
+for (size_t i = 0; i < students.size(); ++i) {
+    if (i > 0) json << ",";
+
+    const auto& student = students[i];
+
+    json << "{"
+         << "\"studentId\":\""
+         << escapeJSON(student.getStudentId()) << "\","
+         << "\"fullName\":\""
+         << escapeJSON(student.getFullName()) << "\""
+         << "}";
+}
+
+json << "]";
 
 // DANH SACH MON HOC
 

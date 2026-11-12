@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 #include <fstream>
+#include <filesystem>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -97,7 +98,13 @@ public:
     // DOC DU LIEU TU CAC FILE
     // ==================================================
 
-    bool loadFromFile(const string& filename) {
+    bool loadFromFiles(
+        const filesystem::path& fileConfig,
+        const filesystem::path& fileCourses,
+        const filesystem::path& fileStudents,
+        const filesystem::path& fileRooms,
+        const filesystem::path& fileSlots
+    ) {
 
         // Xoa du lieu cu neu ham duoc goi lai
         courses.clear();
@@ -110,27 +117,11 @@ public:
         roomCount = 0;
         slotCount = 0;
 
-        // Tim thu muc chua file CONFIG
-        string thuMuc = "";
-        size_t viTri = filename.find_last_of("/\\");
-
-        if (viTri != string::npos) {
-            thuMuc = filename.substr(0, viTri + 1);
-        }
-
-        // Tao duong dan den cac file du lieu
-        string fileConfig = filename;
-        string fileCourses = thuMuc + "data_Courses.txt";
-        string fileStudents = thuMuc + "data_Students.txt";
-        string fileRooms = thuMuc + "data_Rooms.txt";
-        string fileSlots = thuMuc + "data_Time_Slots.txt";
-
-
         // --------------------------------------------------
         // 1. DOC FILE CONFIG
         // --------------------------------------------------
 
-        ifstream file(fileConfig.c_str());
+        ifstream file(fileConfig);
 
         if (!file.is_open()) {
             cerr << "Loi: Khong mo duoc file cau hinh: "
@@ -248,7 +239,7 @@ public:
         // 2. DOC DANH SACH MON HOC
         // --------------------------------------------------
 
-        file.open(fileCourses.c_str());
+        file.open(fileCourses);
 
         if (!file.is_open()) {
             cerr << "Loi: Khong mo duoc file "
@@ -338,7 +329,7 @@ public:
         // 3. DOC DANH SACH SINH VIEN
         // --------------------------------------------------
 
-        file.open(fileStudents.c_str());
+        file.open(fileStudents);
 
         if (!file.is_open()) {
             cerr << "Loi: Khong mo duoc file "
@@ -446,7 +437,7 @@ public:
         // 4. DOC DANH SACH PHONG THI
         // --------------------------------------------------
 
-        file.open(fileRooms.c_str());
+        file.open(fileRooms);
 
         if (!file.is_open()) {
             cerr << "Loi: Khong mo duoc file "
@@ -533,7 +524,7 @@ public:
         // 5. DOC DANH SACH KHUNG GIO THI
         // --------------------------------------------------
 
-        file.open(fileSlots.c_str());
+        file.open(fileSlots);
 
         if (!file.is_open()) {
             cerr << "Loi: Khong mo duoc file "

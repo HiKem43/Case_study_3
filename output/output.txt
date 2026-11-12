@@ -1,0 +1,37 @@
+﻿Dữ liệu hợp lệ. Bắt đầu chạy các thuật toán xếp lịch.
+
+=== Thuật toán tham lam (Greedy) ===
+Số môn đã xếp: 8
+Thời gian: 28502 micro giây
+SCH001 | C01 - Cau truc du lieu | 15-12-2026 08:00-10:00 | Phòng R01 | 250 sinh viên
+SCH002 | C02 - Co so du lieu | 15-12-2026 13:00-15:00 | Phòng R01 | 250 sinh viên
+SCH003 | C03 - Phan tich giai thuat | 15-12-2026 08:00-10:00 | Phòng R02 | 250 sinh viên
+SCH004 | C04 - Mang may tinh | 15-12-2026 13:00-15:00 | Phòng R02 | 250 sinh viên
+SCH005 | C05 - Lap trinh huong doi tuong | 15-12-2026 08:00-10:00 | Phòng R03 | 250 sinh viên
+SCH006 | C06 - He dieu hanh | 15-12-2026 13:00-15:00 | Phòng R03 | 250 sinh viên
+SCH007 | C07 - Cong nghe phan mem | 15-12-2026 08:00-10:00 | Phòng R04 | 250 sinh viên
+SCH008 | C08 - Toan roi rac | 15-12-2026 13:00-15:00 | Phòng R04 | 250 sinh viên
+
+=== Quy hoạch động (DP) ===
+Số môn đã xếp: 8
+Thời gian: 36649 micro giây
+DP001 | C01 - Cau truc du lieu | 15-12-2026 08:00-10:00 | Phòng R01 | 250 sinh viên
+DP002 | C04 - Mang may tinh | 15-12-2026 08:00-10:00 | Phòng R02 | 250 sinh viên
+DP003 | C06 - He dieu hanh | 15-12-2026 08:00-10:00 | Phòng R03 | 250 sinh viên
+DP004 | C08 - Toan roi rac | 15-12-2026 08:00-10:00 | Phòng R04 | 250 sinh viên
+DP005 | C02 - Co so du lieu | 15-12-2026 13:00-15:00 | Phòng R01 | 250 sinh viên
+DP006 | C03 - Phan tich giai thuat | 15-12-2026 13:00-15:00 | Phòng R02 | 250 sinh viên
+DP007 | C05 - Lap trinh huong doi tuong | 15-12-2026 13:00-15:00 | Phòng R03 | 250 sinh viên
+DP008 | C07 - Cong nghe phan mem | 15-12-2026 13:00-15:00 | Phòng R04 | 250 sinh viên
+
+=== Quay lui (Backtracking) ===
+Số môn đã xếp: 8
+Thời gian: 29779 micro giây
+SCH001 | C01 - Cau truc du lieu | 15-12-2026 08:00-10:00 | Phòng R01 | 250 sinh viên
+SCH002 | C02 - Co so du lieu | 15-12-2026 13:00-15:00 | Phòng R01 | 250 sinh viên
+SCH003 | C03 - Phan tich giai thuat | 15-12-2026 08:00-10:00 | Phòng R02 | 250 sinh viên
+SCH004 | C04 - Mang may tinh | 15-12-2026 13:00-15:00 | Phòng R02 | 250 sinh viên
+SCH005 | C05 - Lap trinh huong doi tuong | 15-12-2026 08:00-10:00 | Phòng R03 | 250 sinh viên
+SCH006 | C06 - He dieu hanh | 15-12-2026 13:00-15:00 | Phòng R03 | 250 sinh viên
+SCH007 | C07 - Cong nghe phan mem | 15-12-2026 08:00-10:00 | Phòng R04 | 250 sinh viên
+SCH008 | C08 - Toan roi rac | 15-12-2026 13:00-15:00 | Phòng R04 | 250 sinh viên

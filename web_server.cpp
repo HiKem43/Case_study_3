@@ -10,6 +10,7 @@
 #include <map>
 #include <cctype>
 #include <cstdlib>
+#include <csignal>
 
 #include <winsock2.h>
 #include <ws2tcpip.h>
@@ -261,7 +262,13 @@ return request.substr(bodyPos + 4);
 string getJSONData() {
 DataProcessor dp;
 
-if (!dp.loadFromFile("data/data_Config.txt")) {
+if (!dp.loadFromFiles(
+        "input/data_Config.txt",
+        "input/data_Courses.txt",
+        "input/data_Students.txt",
+        "input/data_Rooms.txt",
+        "input/data_Time_Slots.txt"
+    )) {
     return R"({"ok":false,"error":"Khong doc duoc du lieu. Hay chay server tu thu muc goc project."})";
 }
 
@@ -405,7 +412,13 @@ if (body.find("\"backtracking\"") != string::npos) {
 
 DataProcessor dp;
 
-if (!dp.loadFromFile("data/data_Config.txt")) {
+if (!dp.loadFromFiles(
+        "input/data_Config.txt",
+        "input/data_Courses.txt",
+        "input/data_Students.txt",
+        "input/data_Rooms.txt",
+        "input/data_Time_Slots.txt"
+    )) {
     return R"({"ok":false,"error":"Khong doc duoc du lieu"})";
 }
 
@@ -643,7 +656,18 @@ return json.str();
 // MAIN SERVER
 // ======================================================
 
+volatile std::sig_atomic_t shutdownRequested = 0;
+
+void handleInterrupt(int) {
+    shutdownRequested = 1;
+}
+
 int main() {
+if (std::signal(SIGINT, handleInterrupt) == SIG_ERR) {
+    cerr << "Khong the dang ky xu ly Ctrl+C.\n";
+    return 1;
+}
+
 WSADATA wsa;
 
 if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
@@ -694,7 +718,34 @@ if (listen(serverSocket, SOMAXCONN) == SOCKET_ERROR) {
 cout << "Server dang chay tai http://127.0.0.1:8080\n";
 cout << "Nhan Ctrl+C de dung.\n";
 
-while (true) {
+while (!shutdownRequested) {
+    fd_set readableSockets;
+    FD_ZERO(&readableSockets);
+    FD_SET(serverSocket, &readableSockets);
+
+    timeval timeout{};
+    timeout.tv_usec = 250000;
+
+    int ready = select(
+        0,
+        &readableSockets,
+        nullptr,
+        nullptr,
+        &timeout
+    );
+
+    if (ready == 0) {
+        continue;
+    }
+
+    if (ready == SOCKET_ERROR) {
+        if (!shutdownRequested) {
+            cerr << "Loi khi cho ket noi: "
+                 << WSAGetLastError() << "\n";
+        }
+        break;
+    }
+
     SOCKET client = accept(
         serverSocket,
         nullptr,
@@ -702,6 +753,10 @@ while (true) {
     );
 
     if (client == INVALID_SOCKET) {
+        if (!shutdownRequested) {
+            cerr << "Khong chap nhan duoc ket noi: "
+                 << WSAGetLastError() << "\n";
+        }
         continue;
     }
 
@@ -818,6 +873,7 @@ while (true) {
     closesocket(client);
 }
 
+cout << "\nServer da dung.\n";
 closesocket(serverSocket);
 WSACleanup();
 

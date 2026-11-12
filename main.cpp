@@ -1,10 +1,17 @@
 #include <iostream>
 #include <chrono>
 #include <filesystem>
+#include <fstream>
 #include <string>
 #include <system_error>
 #include <unordered_map>
 #include <vector>
+#ifdef _WIN32
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+#endif
 #include "DataProcessor.h"
 #include "GreedyScheduler.h"
 #include "DPScheduler.h"
@@ -13,113 +20,96 @@
 using namespace std;
 namespace fs = std::filesystem;
 
-static bool setWorkingDirectoryToDataRoot() {
-    const fs::path configRelativePath = fs::path("data") / "data_Config.txt";
-    error_code error;
-
-    auto isRegularFile = [&error](const fs::path& path) {
-        error.clear();
-        const bool regularFile = fs::is_regular_file(path, error);
-        if (error == errc::no_such_file_or_directory || error == errc::not_a_directory) {
-            error.clear();
-        }
-        return regularFile;
-    };
-
-    fs::path directory = fs::current_path(error);
-    if (error) {
-        cerr << "Khong the xac dinh thu muc lam viec: " << error.message() << endl;
-        return false;
-    }
-
-    while (!directory.empty()) {
-        const fs::path candidate = directory / configRelativePath;
-        if (isRegularFile(candidate)) {
-            fs::current_path(directory, error);
-            if (error) {
-                cerr << "Khong the chuyen den thu muc du lieu: " << error.message() << endl;
-                return false;
-            }
-            return true;
-        }
-        if (error) {
-            cerr << "Khong the kiem tra file du lieu: " << error.message() << endl;
-            return false;
-        }
-
-        const fs::path parent = directory.parent_path();
-        if (parent == directory) {
-            break;
-        }
-        directory = parent;
-    }
-
-    cerr << "Khong tim thay data/data_Config.txt trong thu muc hien tai "
-         << "hoac cac thu muc cha." << endl;
-    return false;
-}
-
 void printResults(
+    ostream& output,
     const string& algorithmName,
     const vector<Schedule>& schedules,
     const vector<string>& failedCourses,
     long long elapsedMicroseconds
 ) {
-    cout << "\n=== " << algorithmName << " ===" << endl;
-    cout << "So mon da xep: " << schedules.size() << endl;
-    cout << "Thoi gian: " << elapsedMicroseconds << " micro giay" << endl;
+    output << "\n=== " << algorithmName << " ===\n";
+    output << "Số môn đã xếp: " << schedules.size() << '\n';
+    output << "Thời gian: " << elapsedMicroseconds << " micro giây\n";
 
     for (const Schedule& schedule : schedules) {
         const Course course = schedule.getCourse();
         const ExamRoom room = schedule.getRoom();
         const TimeSlot slot = schedule.getTimeSlot();
 
-        cout << schedule.getScheduleId()
+        output << schedule.getScheduleId()
              << " | " << course.getCourseId()
              << " - " << course.getCourseName()
              << " | " << slot.getExamDate()
              << " " << slot.getStartTime() << "-" << slot.getEndTime()
-             << " | Phong " << room.getRoomId()
-             << " | " << schedule.getStudents().size() << " sinh vien"
-             << endl;
+             << " | Phòng " << room.getRoomId()
+             << " | " << schedule.getStudents().size() << " sinh viên"
+             << '\n';
     }
 
     if (!failedCourses.empty()) {
-        cout << "Cac mon chua xep duoc: ";
+        output << "Các môn chưa xếp được: ";
         for (size_t i = 0; i < failedCourses.size(); ++i) {
-            if (i > 0) cout << ", ";
-            cout << failedCourses[i];
+            if (i > 0) output << ", ";
+            output << failedCourses[i];
         }
-        cout << endl;
+        output << '\n';
     }
 }
 
 int main(int argc, char* argv[]) {
+#ifdef _WIN32
+    const HANDLE consoleOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+    DWORD consoleMode;
+    if (consoleOutput != INVALID_HANDLE_VALUE &&
+        GetConsoleMode(consoleOutput, &consoleMode) &&
+        !SetConsoleOutputCP(CP_UTF8)) {
+        const DWORD errorCode = GetLastError();
+        cerr << "Không thể đặt mã hóa console thành UTF-8. Mã lỗi: "
+             << errorCode << '\n';
+        return 1;
+    }
+#endif
+
     if (argc > 2) {
-        cerr << "Cach dung: " << argv[0]
-             << " [duong_dan_file_config]" << endl;
+        cerr << "Cách dùng: " << argv[0]
+             << " [thu_muc_chua_du_lieu]\n";
         return 1;
     }
 
-    string configFile = "data/data_Config.txt";
-    if (argc == 2) {
-        configFile = argv[1];
-    } else if (!setWorkingDirectoryToDataRoot()) {
-        return 1;
-    }
+    const fs::path inputDirectory = argc == 2 ? argv[1] : "input";
 
     DataProcessor dataProcessor;
 
-    if (!dataProcessor.loadFromFile(configFile)) {
-        cerr << "Khong the doc du lieu!" << endl;
+    if (!dataProcessor.loadFromFiles(
+            inputDirectory / "data_Config.txt",
+            inputDirectory / "data_Courses.txt",
+            inputDirectory / "data_Students.txt",
+            inputDirectory / "data_Rooms.txt",
+            inputDirectory / "data_Time_Slots.txt"
+        )) {
+        cerr << "Không thể tải dữ liệu!\n";
         return 1;
     }
 
     if (!dataProcessor.validateData()) {
-        cerr << "Du lieu khong hop le. Hay kiem tra lai!" << endl;
+        cerr << "Dữ liệu không hợp lệ. Hãy kiểm tra lại!\n";
         return 1;
     }
 
+    error_code outputError;
+    fs::create_directories("output", outputError);
+    if (outputError) {
+        cerr << "Không thể tạo thư mục output: "
+             << outputError.message() << '\n';
+        return 1;
+    }
+
+    ofstream outputFile(fs::path("output") / "output.txt");
+    if (!outputFile) {
+        cerr << "Không thể mở file output/output.txt để ghi.\n";
+        return 1;
+    }
+    outputFile.write("\xEF\xBB\xBF", 3);
 
     const vector<Course> courses = dataProcessor.getCourses();
     const vector<Student> students = dataProcessor.getStudents();
@@ -127,13 +117,23 @@ int main(int argc, char* argv[]) {
     const vector<TimeSlot> timeSlots = dataProcessor.getTimeSlots();
 
     unordered_map<string, vector<Student>> courseStudentsMap;
+    courseStudentsMap.reserve(courses.size());
     for (const Student& student : students) {
         for (const string& courseId : student.getRegisteredCourses()) {
             courseStudentsMap[courseId].push_back(student);
         }
     }
 
-    cout << "Du lieu hop le. Bat dau chay cac thuat toan xep lich." << endl;
+    cout << "Dữ liệu hợp lệ. Bắt đầu chạy các thuật toán xếp lịch.\n";
+    outputFile << "Dữ liệu hợp lệ. Bắt đầu chạy các thuật toán xếp lịch.\n";
+
+    auto reportResults = [&](const string& algorithmName,
+                             const vector<Schedule>& schedules,
+                             const vector<string>& failedCourses,
+                             long long elapsedMicroseconds) {
+        printResults(cout, algorithmName, schedules, failedCourses, elapsedMicroseconds);
+        printResults(outputFile, algorithmName, schedules, failedCourses, elapsedMicroseconds);
+    };
 
     vector<string> greedyFailedCourses;
     auto start = chrono::steady_clock::now();
@@ -143,7 +143,7 @@ int main(int argc, char* argv[]) {
     auto elapsed = chrono::duration_cast<chrono::microseconds>(
         chrono::steady_clock::now() - start
     ).count();
-    printResults("Thuat toan tham lam (Greedy)", greedySchedules, greedyFailedCourses, elapsed);
+    reportResults("Thuật toán tham lam (Greedy)", greedySchedules, greedyFailedCourses, elapsed);
 
     vector<string> dpFailedCourses;
     start = chrono::steady_clock::now();
@@ -153,7 +153,7 @@ int main(int argc, char* argv[]) {
     elapsed = chrono::duration_cast<chrono::microseconds>(
         chrono::steady_clock::now() - start
     ).count();
-    printResults("Quy hoach dong (DP)", dpSchedules, dpFailedCourses, elapsed);
+    reportResults("Quy hoạch động (DP)", dpSchedules, dpFailedCourses, elapsed);
 
     vector<string> backtrackingFailedCourses;
     start = chrono::steady_clock::now();
@@ -163,8 +163,8 @@ int main(int argc, char* argv[]) {
     elapsed = chrono::duration_cast<chrono::microseconds>(
         chrono::steady_clock::now() - start
     ).count();
-    printResults(
-        "Quay lui va cat tia (Backtracking)",
+    reportResults(
+        "Quay lui (Backtracking)",
         backtrackingSchedules,
         backtrackingFailedCourses,
         elapsed
